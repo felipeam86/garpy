@@ -1,0 +1,3 @@
+garpy:
+  endpoints:
+    SSO_LOGIN_URL: "https://sso.garmin.com/sso/signin"
