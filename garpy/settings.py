@@ -63,7 +63,7 @@ def get_logger(name,
         # Create STDERR handler
         handler = logging.StreamHandler(sys.stderr)
         handler.setFormatter(formatter)
-        handler.setLevel(logging.DEBUG)
+        handler.setLevel(logging.INFO)
         logger.addHandler(handler)
 
     if filename is not None:
