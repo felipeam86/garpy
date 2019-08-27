@@ -11,6 +11,7 @@ https://github.com/petergardfjall/garminexport
 """
 
 import json
+from typing import Dict, Any
 
 import attr
 import pendulum
@@ -36,6 +37,8 @@ class Activity:
         Type of activity, e.g, Cycling, Swimming, etc
     start
         Start date and time
+    summary
+        Dictionary with json summary downloaded from Garmin
 
     Examples
     --------
@@ -50,40 +53,99 @@ class Activity:
     name: str = attr.ib()
     type: str = attr.ib()
     start: pendulum.DateTime = attr.ib()
+    summary: Dict[str, Any] = attr.ib(default={})
 
     @classmethod
-    def from_garmin_connect(cls, activity_id, client):
-        """Constructor that fetches activity summary from Garmin Connect.
+    def from_garmin_summary(cls, summary: str):
+        """Constructor based on garmin connect summary.
 
         Parameters
         ----------
-        activity_id
-            Activity ID on Garmin Connect
-        client
-            An authenticated GarminClient instance.
+        summary
+            JSON string representation of summary information fetched from garmin connect
         """
 
-        if not client.session:
-            raise Exception(
-                "Attempt to use GarminClient without being connected. Call connect() before first use."
-            )
-
-        response = client.session.get(
-            ENDPOINTS["ACTIVITY_SUMMARY"].format(id=activity_id)
-        )
-        if response.status_code != 200:
-            err_message = f"Failed to fetch json summary for activity {activity_id}: {response.status_code}\n{response.text}"
-            logger.error(err_message)
-            raise Exception(err_message)
-
-        summary = json.loads(response.text)
-        start = pendulum.parse(
-            summary["summaryDTO"]["startTimeLocal"],
-            tz=summary["timeZoneUnitDTO"]["unitKey"],
-        )
+        summary = json.loads(summary)
         return cls(
-            id=activity_id,
+            id=summary["activityId"],
             name=summary["activityName"],
             type=summary["activityTypeDTO"]["typeKey"],
-            start=start,
+            start=pendulum.parse(
+                summary["summaryDTO"]["startTimeLocal"],
+                tz=summary["timeZoneUnitDTO"]["unitKey"],
+            ),
+            summary=summary,
         )
+
+
+def _get_json_summary(activity_id: int, client: GarminClient) -> str:
+    """Fetch JSON activity summary from Garmin Connect.
+
+    Parameters
+    ----------
+    activity_id
+        Activity ID on Garmin Connect
+    client
+        An authenticated GarminClient instance.
+    """
+
+    response = client.get(
+        url=ENDPOINTS["JSON_ACTIVITY_SUMMARY"].format(id=activity_id),
+        err_message=f"Failed to fetch json activity summary for id: {activity_id}.",
+    )
+
+    return response.text
+
+
+def _get_json_details(activity_id: int, client: GarminClient) -> str:
+    """Fetch JSON activity details from Garmin Connect.
+
+    Parameters
+    ----------
+    activity_id
+        Activity ID on Garmin Connect
+    client
+        An authenticated GarminClient instance.
+    """
+
+    response = client.get(
+        url=ENDPOINTS["JSON_ACTIVITY_DETAILS"].format(id=activity_id),
+        err_message=f"Failed to fetch json activity details for id: {activity_id}.",
+    )
+
+    return response.text
+
+
+@attr.s
+class ActivityDownloader:
+    """A client class used to download activities from Garmin Connect
+
+    Parameters
+    ----------
+    id
+        Activity ID on Garmin Connect
+    client
+        An authenticated GarminClient instance.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        >>> with GarminClient("my.sample@sample.com", "secretpassword") as client:
+        >>>     activity = ActivityDownloader(3983141717, client)
+    """
+
+    client: GarminClient = attr.ib()
+    downloaders: Dict[str, Any] = attr.ib(
+        default={"summary": _get_json_summary, "details": _get_json_details}
+    )
+
+    def get(self, activity_id, fmt):
+        downloader = self.downloaders.get(fmt)
+        if not downloader:
+            raise ValueError(
+                f"A downloader for the format {fmt} has not been registered"
+            )
+
+        return downloader(activity_id, self.client)
+
