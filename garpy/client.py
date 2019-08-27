@@ -11,8 +11,6 @@ https://github.com/cpfair/tapiriik/blob/master/tapiriik/services/GarminConnect/g
 """
 
 import re
-from functools import wraps
-from typing import Callable
 
 import attr
 import requests
@@ -21,31 +19,6 @@ from .settings import config, get_logger
 
 logger = get_logger(__name__)
 ENDPOINTS = config["endpoints"]
-
-
-def require_session(client_function: Callable):
-    """Decorator that guarantees that there is an active authenticated session
-
-    Parameters
-    ----------
-    client_function : Callable
-        Method of the class :class:`GarminClient`
-
-    Returns
-    -------
-    Decorated method that verifies an active authenticated connection before running
-    """
-
-    @wraps(client_function)
-    def check_session(*args, **kwargs):
-        client_object = args[0]
-        if not client_object.session:
-            raise Exception(
-                "Attempt to use GarminClient without being connected. Call connect() before first use.'"
-            )
-        return client_function(*args, **kwargs)
-
-    return check_session
 
 
 def extract_auth_ticket_url(auth_response: str):
@@ -153,3 +126,31 @@ class GarminClient(object):
         # appears like we need to touch base with the old API to initiate
         # some form of legacy session. otherwise certain downloads will fail.
         self.session.get("https://connect.garmin.com/legacy/session")
+
+    def get(self, url: str, err_message: str) -> requests.Response:
+        """Send a get request on an authenticated session and tolerate some response codes
+
+        Parameters
+        ----------
+        url
+            Endpoint you want to query
+        err_message
+            In case of error, this message will be logged and raised with an exception
+
+        Returns
+        -------
+        Response of the GET query
+        """
+
+        if not self.session:
+            raise Exception(
+                "Attempt to use GarminClient without being connected. Call connect() before first use."
+            )
+
+        response = self.session.get(url)
+        if response.status_code != 200:
+            err_message += f"\nResponse code: {response.status_code}\n{response.text}"
+            logger.error(err_message)
+            raise Exception(err_message)
+        else:
+            return response
