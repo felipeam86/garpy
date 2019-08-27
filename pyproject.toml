@@ -11,6 +11,7 @@ readme = "README.md"
 python = "^3.7"
 requests = "^2.22"
 attrs = "^19.1"
+pendulum = "^2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
