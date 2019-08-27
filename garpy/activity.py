@@ -11,13 +11,13 @@ https://github.com/petergardfjall/garminexport
 """
 
 import json
-from typing import Dict, Any
+from typing import Any, Dict, Tuple
 
 import attr
 import pendulum
 
-from .settings import config, get_logger
 from .client import GarminClient
+from .settings import config, get_logger
 
 logger = get_logger(__name__)
 ENDPOINTS = config["endpoints"]
@@ -56,16 +56,16 @@ class Activity:
     summary: Dict[str, Any] = attr.ib(default={})
 
     @classmethod
-    def from_garmin_summary(cls, summary: str):
+    def from_garmin_summary(cls, json_summary: str):
         """Constructor based on garmin connect summary.
 
         Parameters
         ----------
-        summary
+        json_summary
             JSON string representation of summary information fetched from garmin connect
         """
 
-        summary = json.loads(summary)
+        summary: Dict[str, Any] = json.loads(json_summary)
         return cls(
             id=summary["activityId"],
             name=summary["activityName"],
@@ -116,29 +116,53 @@ def _get_json_details(activity_id: int, client: GarminClient) -> str:
     return response.text
 
 
+DOWNLOADERS = {"summary": _get_json_summary, "details": _get_json_details}
+
+
 @attr.s
 class ActivityDownloader:
     """A client class used to download activities from Garmin Connect
 
     Parameters
     ----------
-    id
-        Activity ID on Garmin Connect
+    activity
+        Instance of Activity
     client
         An authenticated GarminClient instance.
+    downloaders:
+        Dictionary mapping formats to downloader function
 
     Examples
     --------
     .. code-block:: python
 
         >>> with GarminClient("my.sample@sample.com", "secretpassword") as client:
-        >>>     activity = ActivityDownloader(3983141717, client)
+        >>>     activity = ActivityDownloader.from_garmin(3983141717, client)
     """
 
     client: GarminClient = attr.ib()
-    downloaders: Dict[str, Any] = attr.ib(
-        default={"summary": _get_json_summary, "details": _get_json_details}
-    )
+    activity: Activity = attr.ib(default=None)
+    downloaders: Dict[str, Any] = attr.ib(default=DOWNLOADERS)
+
+    @classmethod
+    def from_garmin(
+        cls,
+        activity_id: int,
+        client: GarminClient,
+        formats: Tuple = tuple(DOWNLOADERS.keys()),
+    ):
+        if not set(formats).issubset(set(DOWNLOADERS.keys())):
+            raise Exception(
+                "There is no existent downloader for the following formats: "
+                f"{set(formats) - set(DOWNLOADERS.keys())}"
+            )
+
+        activity_downloader = cls(
+            client=client, downloaders={fmt: DOWNLOADERS[fmt] for fmt in formats}
+        )
+        json_summary = activity_downloader.get(activity_id, "summary")
+        activity_downloader.activity = Activity.from_garmin_summary(json_summary)
+        return activity_downloader
 
     def get(self, activity_id, fmt):
         downloader = self.downloaders.get(fmt)
@@ -148,4 +172,3 @@ class ActivityDownloader:
             )
 
         return downloader(activity_id, self.client)
-
