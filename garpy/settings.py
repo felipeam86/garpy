@@ -6,8 +6,6 @@ import sys
 import yaml
 from pathlib import Path
 
-from pythonjsonlogger import jsonlogger
-
 PACKAGE_NAME = 'garpy'
 
 
@@ -45,9 +43,7 @@ for config_file in extra_config_files:
         config_files.append(config_file)
 
 
-def get_logger(name,
-               filename=config.get('log_filepath'),
-               streamhandler=config.get('log_stream', True)):
+def get_logger(name):
 
     # Create logger
     logger = logging.getLogger(name)
@@ -55,31 +51,19 @@ def get_logger(name,
     # Avoid duplicate handlers
     logger.handlers = []
 
-    if streamhandler:
-        formatter = logging.Formatter(
-            '%(asctime)s-%(name)s-%(levelname)s - %(message)s',
-            '%Y-%m-%d-%H:%M:%S'
-        )
-        # Create STDERR handler
-        handler = logging.StreamHandler(sys.stderr)
-        handler.setFormatter(formatter)
-        handler.setLevel(logging.INFO)
-        logger.addHandler(handler)
-
-    if filename is not None:
-        # Create formatter and add it to the handler
-        formatter = jsonlogger.JsonFormatter(
-            "%(asctime) %(name) %(levelname) %(message)",
-        )
-        # Create json formatter
-        filehandler = logging.FileHandler(filename)
-        filehandler.setFormatter(formatter)
-        filehandler.setLevel(logging.DEBUG)
-        logger.addHandler(filehandler)
+    formatter = logging.Formatter(
+        '%(asctime)s-%(name)s-%(levelname)s - %(message)s',
+        '%Y-%m-%d-%H:%M:%S'
+    )
+    # Create STDERR handler
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(formatter)
+    handler.setLevel(logging.INFO)
+    logger.addHandler(handler)
 
     # Prevent multiple logging if called from other packages
     logger.propagate = False
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     return logger
 
