@@ -41,7 +41,7 @@ def extract_auth_ticket_url(auth_response: str):
 
     match = re.search(r'response_url\s*=\s*"(https:[^"]+)"', auth_response)
     if not match:
-        raise RuntimeError(
+        raise ConnectionError(
             "auth failure: unable to extract auth ticket URL. did you provide a correct username/password?"
         )
     auth_ticket_url = match.group(1).replace("\\", "")
@@ -82,7 +82,7 @@ class GarminClient(object):
 
     username: str = attr.ib(default=config.get("username"))
     password: str = attr.ib(default=config.get("password"), repr=False)
-    session: requests.Session = attr.ib(default=requests.Session(), repr=False)
+    session: requests.Session = attr.ib(default=None, repr=False)
 
     def __enter__(self):
         self.connect()
@@ -92,6 +92,7 @@ class GarminClient(object):
         self.disconnect()
 
     def connect(self):
+        self.session = self.session or requests.Session()
         self._authenticate()
 
     def disconnect(self):
@@ -113,13 +114,15 @@ class GarminClient(object):
         )
         logger.debug("got auth response: %s", auth_response.text)
         if auth_response.status_code != 200:
-            raise ValueError("authentication failure: did you enter valid credentials?")
+            raise ConnectionError(
+                "authentication failure: did you enter valid credentials?"
+            )
         auth_ticket_url = extract_auth_ticket_url(auth_response.text)
 
         logger.info("claiming auth ticket ...")
         response = self.session.get(auth_ticket_url)
         if response.status_code != 200:
-            raise RuntimeError(
+            raise ConnectionError(
                 f"auth failure: failed to claim auth ticket: {auth_ticket_url}: {response.status_code}\n{response.text}"
             )
 
@@ -143,7 +146,7 @@ class GarminClient(object):
         """
 
         if not self.session:
-            raise Exception(
+            raise ConnectionError(
                 "Attempt to use GarminClient without being connected. Call connect() before first use."
             )
 
@@ -151,6 +154,6 @@ class GarminClient(object):
         if response.status_code != 200:
             err_message += f"\nResponse code: {response.status_code}\n{response.text}"
             logger.error(err_message)
-            raise Exception(err_message)
+            raise ConnectionError(err_message)
         else:
             return response
