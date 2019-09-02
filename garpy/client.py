@@ -92,6 +92,11 @@ class GarminClient(object):
         self.disconnect()
 
     def connect(self):
+        if (not bool(self.username)) or (not bool(self.password)):
+            raise ConnectionError(
+                "Missing credentials. Your forgot to provide username or password. "
+                f"username: '{self.username}'. password: '{self.password}'"
+            )
         self.session = self.session or requests.Session()
         self._authenticate()
 

@@ -59,6 +59,33 @@ class TestGarminClient:
         clg.disconnect()
         assert clg.session is None, "Session should be empty after disconnecting"
 
+    def test_connect_fails_with_empty_username_password(self):
+        """Test that .connect() raises ConnectionError with missing/empty credentials"""
+
+        clg = client.GarminClient(username="", password="falsepassword")
+        with pytest.raises(ConnectionError) as excinfo:
+            clg.connect()
+
+        err_msg = f"Missing credentials. Your forgot to provide username or password. " \
+                  f"username: ''. password: 'falsepassword'"
+        assert err_msg in str(excinfo.value)
+
+        clg = client.GarminClient(username="falseuser", password="")
+        with pytest.raises(ConnectionError) as excinfo:
+            clg.connect()
+
+        err_msg = f"Missing credentials. Your forgot to provide username or password. " \
+                  f"username: 'falseuser'. password: ''"
+        assert err_msg in str(excinfo.value)
+
+        clg = client.GarminClient(username="", password="")
+        with pytest.raises(ConnectionError) as excinfo:
+            clg.connect()
+
+        err_msg = f"Missing credentials. Your forgot to provide username or password. " \
+                  f"username: ''. password: ''"
+        assert err_msg in str(excinfo.value)
+
     def test_authentication_fail_raises_error(self):
         """Test that .connect() raises ConnectionError with dummy credentials"""
         clg = client.GarminClient(username="falseuser", password="falsepassword")
