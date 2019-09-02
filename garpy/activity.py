@@ -84,7 +84,7 @@ def _get_json_summary(activity_id: int, client: GarminClient) -> str:
 
     response = client.get(
         url=ENDPOINTS["JSON_ACTIVITY_SUMMARY"].format(id=activity_id),
-        err_message=f"Failed to fetch json activity summary for id: {activity_id}.",
+        err_message=f"Failed to fetch json activity summary for activity id: {activity_id}.",
     )
 
     return response.text
@@ -96,7 +96,7 @@ def _get_json_details(activity_id: int, client: GarminClient) -> str:
 
     response = client.get(
         url=ENDPOINTS["JSON_ACTIVITY_DETAILS"].format(id=activity_id),
-        err_message=f"Failed to fetch json activity details for id: {activity_id}.",
+        err_message=f"Failed to fetch json activity details for activity id: {activity_id}.",
     )
 
     return response.text
