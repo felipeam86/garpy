@@ -80,13 +80,6 @@ class Activity:
 
 def _get_json_summary(activity_id: int, client: GarminClient) -> str:
     """Fetch JSON activity summary from Garmin Connect.
-
-    Parameters
-    ----------
-    activity_id
-        Activity ID on Garmin Connect
-    client
-        An authenticated GarminClient instance.
     """
 
     response = client.get(
@@ -99,13 +92,6 @@ def _get_json_summary(activity_id: int, client: GarminClient) -> str:
 
 def _get_json_details(activity_id: int, client: GarminClient) -> str:
     """Fetch JSON activity details from Garmin Connect.
-
-    Parameters
-    ----------
-    activity_id
-        Activity ID on Garmin Connect
-    client
-        An authenticated GarminClient instance.
     """
 
     response = client.get(
