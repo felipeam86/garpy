@@ -135,6 +135,10 @@ class GarminClient(object):
         # some form of legacy session. otherwise certain downloads will fail.
         self.session.get("https://connect.garmin.com/legacy/session")
 
+    @property
+    def connected(self):
+        return self.session is not None
+
     def get(self, url: str, err_message: str) -> requests.Response:
         """Send a get request on an authenticated session and tolerate some response codes
 
@@ -150,7 +154,7 @@ class GarminClient(object):
         Response of the GET query
         """
 
-        if not self.session:
+        if not self.connected:
             raise ConnectionError(
                 "Attempt to use GarminClient without being connected. Call connect() before first use."
             )

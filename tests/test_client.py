@@ -50,14 +50,14 @@ class TestGarminClient:
         """Test expected behavior of .connect() and disconnect()"""
         clg = get_client_with_mocked_authenticate()
 
-        assert clg.session is None, "Session should be empty before connecting"
+        assert not clg.connected, "Client should not be connected"
         clg.connect()
         clg._authenticate.assert_called_once()
         assert (
-            clg.session is not None
-        ), "A session should have been created after connection"
+            clg.connected
+        ), "Client should be connected after authentication"
         clg.disconnect()
-        assert clg.session is None, "Session should be empty after disconnecting"
+        assert not clg.connected, "Client should be disconnected after disconnecting"
 
     def test_connect_fails_with_empty_username_password(self):
         """Test that .connect() raises ConnectionError with missing/empty credentials"""
@@ -96,14 +96,14 @@ class TestGarminClient:
         """Test that context managers creates and destroys the session"""
 
         clg = get_client_with_mocked_authenticate()
-        assert clg.session is None, "Session should be empty before with statement"
+        assert not clg.connected, "Client should not be connected"
         with clg:
             clg._authenticate.assert_called_once()
             assert (
-                clg.session is not None
-            ), "A session should have been created within the with statement"
+                clg.connected
+            ), "The client should be connected within the with statement"
 
-        assert clg.session is None, "Session should be empty after with statement"
+        assert not clg.connected, "Client should have disconnected after with statement"
 
     def test_authenticate(self):
         """Test normal behavior of _authenticate"""
