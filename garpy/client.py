@@ -11,6 +11,7 @@ https://github.com/cpfair/tapiriik/blob/master/tapiriik/services/GarminConnect/g
 """
 
 import re
+from typing import Tuple
 
 import attr
 import requests
@@ -139,7 +140,9 @@ class GarminClient(object):
     def connected(self):
         return self.session is not None
 
-    def get(self, url: str, err_message: str) -> requests.Response:
+    def get(
+            self, url: str, err_message: str, tolerate: Tuple = ()
+    ) -> requests.Response:
         """Send a get request on an authenticated session and tolerate some response codes
 
         Parameters
@@ -148,6 +151,8 @@ class GarminClient(object):
             Endpoint you want to query
         err_message
             In case of error, this message will be logged and raised with an exception
+        tolerate
+            Wich HTML response codes to tolerate.
 
         Returns
         -------
@@ -160,7 +165,9 @@ class GarminClient(object):
             )
 
         response = self.session.get(url)
-        if response.status_code != 200:
+        if response.status_code in tolerate:
+            return response
+        elif response.status_code != 200:
             err_message += f"\nResponse code: {response.status_code}\n{response.text}"
             logger.error(err_message)
             raise ConnectionError(err_message)

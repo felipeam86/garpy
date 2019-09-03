@@ -197,3 +197,12 @@ class TestGarminClient:
                 clg.get(url="dummy_url", err_message="")
             assert f"Response code: 404" in str(excinfo.value)
             clg.session.get.assert_called_once()
+
+    def test_get_tolerates_error_codes(self):
+        clg = get_client_with_mocked_authenticate()
+        with clg:
+            clg.session.get = get_mocked_request(
+                status_code=404, func_name="clg.session.get()"
+            )
+            clg.get(url="dummy_url", err_message="", tolerate=(404,))
+            clg.session.get.assert_called_once()
