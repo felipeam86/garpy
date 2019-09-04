@@ -1,24 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from unittest.mock import Mock
 import pytest
 import requests
 
 from garpy import client
-
-
-def get_client_with_mocked_authenticate():
-    clg = client.GarminClient(username="dummy", password="dummy")
-    clg._authenticate = Mock(return_value=None, name="clg._authenticate()")
-    return clg
-
-
-def get_mocked_request(status_code=200, func_name=None, text=None):
-    failed_response = Mock()
-    failed_response.status_code = status_code
-    failed_response.text = text or ""
-    return Mock(return_value=failed_response, name=func_name)
+from garpy.settings import config
+from common import get_client_with_mocked_authenticate, get_mocked_request
 
 
 class TestExtractAuthTicketUrl:
@@ -206,3 +194,53 @@ class TestGarminClient:
             )
             clg.get(url="dummy_url", err_message="", tolerate=(404,))
             clg.session.get.assert_called_once()
+
+    def test_get_activity(self):
+        clg = get_client_with_mocked_authenticate()
+        with clg:
+            for fmt, parameters in config["activities"].items():
+                # Test normal behavior with 200 response code
+                clg.session.get = get_mocked_request(
+                    status_code=200, func_name="clg.session.get()"
+                )
+                clg.get_activity(9766544337, fmt)
+                clg.session.get.assert_called_once()
+                clg.session.get.assert_called_with(
+                    parameters["endpoint"].format(id=9766544337)
+                )
+
+                # Test raised exception with 400 response code
+                clg.session.get = get_mocked_request(
+                    status_code=400, func_name="clg.session.get()"
+                )
+                with pytest.raises(ConnectionError) as excinfo:
+                    clg.get_activity(9766544337, fmt)
+                assert f"Response code: 400" in str(excinfo.value)
+
+                clg.session.get.assert_called_once()
+                clg.session.get.assert_called_with(
+                    parameters["endpoint"].format(id=9766544337)
+                )
+
+                # Test error codes get tolerated
+                if parameters.get("tolerate") is not None:
+                    for code in parameters.get("tolerate"):
+                        clg.session.get = get_mocked_request(
+                            status_code=code, func_name="clg.session.get()"
+                        )
+                        clg.get_activity(9766544337, fmt)
+                        clg.session.get.assert_called_once()
+                        clg.session.get.assert_called_with(
+                            parameters["endpoint"].format(id=9766544337)
+                        )
+
+    def test_get_activity_raises_error_unknown_format(self):
+        clg = get_client_with_mocked_authenticate()
+        with clg:
+            with pytest.raises(ValueError) as excinfo:
+                clg.get_activity(9766544337, "random_format")
+
+            assert (
+                f"Parameters for downloading the format 'random_format' have not been provided."
+                in str(excinfo.value)
+            )

@@ -137,7 +137,7 @@ class GarminClient(object):
         self.session.get("https://connect.garmin.com/legacy/session")
 
     @property
-    def connected(self):
+    def connected(self) -> bool:
         return self.session is not None
 
     def get(
@@ -173,3 +173,31 @@ class GarminClient(object):
             raise ConnectionError(err_message)
         else:
             return response
+
+    def get_activity(self, activity_id, fmt) -> requests.Response:
+        """Get an activity from its ID on the requested format
+
+        Parameters
+        ----------
+        activity_id
+            Activity ID on Garmin Connect
+        fmt
+            Format you wish to download.
+
+        Returns
+        -------
+        requests.Response
+            Response content of the request to Garmin Connect
+        """
+        format_parameters = config["activities"].get(fmt)
+        if not format_parameters:
+            raise ValueError(
+                f"Parameters for downloading the format '{fmt}' have not been provided."
+            )
+
+        response = self.get(
+            url=format_parameters["endpoint"].format(id=activity_id),
+            err_message=f"Failed to fetch '{fmt}' for activity id {activity_id}.",
+            tolerate=tuple(format_parameters.get("tolerate", tuple())),
+        )
+        return response

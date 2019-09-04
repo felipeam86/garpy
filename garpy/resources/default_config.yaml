@@ -2,5 +2,26 @@ garpy:
   backup-dir: 'activities'
   endpoints:
     SSO_LOGIN_URL: "https://sso.garmin.com/sso/signin"
-    JSON_ACTIVITY_SUMMARY: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}"
-    JSON_ACTIVITY_DETAILS: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}/details"
+  activities:
+    summary:
+      endpoint: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}"
+      suffix: "_summary.json"
+    details:
+      endpoint: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}/details"
+      suffix: "_details.json"
+    gpx:
+      endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/gpx/activity/{id}"
+      suffix: ".gpx"
+      tolerate:
+        - 404
+        - 204
+    tcx:
+      endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/tcx/activity/{id}"
+      suffix: ".tcx"
+      tolereta:
+        - 404
+    original:
+      endpoint: "https://connect.garmin.com/modern/proxy/download-service/files/activity/{id}"
+      tolerate:
+        - 404
+        - 500
