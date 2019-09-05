@@ -71,7 +71,7 @@ def get_logger(name):
 logger = get_logger(__name__)
 
 if len(config_files) > 0:
-    logger.info(f"Loaded configuration from the following file(s): {config_files}")
+    logger.debug(f"Loaded configuration from the following file(s): {config_files}")
 
 # Format and typing of the config goes here, e.g.:
 # config['root_path'] = Path(config['root_path']).expanduser()
