@@ -32,7 +32,7 @@ class TestActivity:
 
             clg.session.get.assert_called_once()
             clg.session.get.assert_called_with(
-                config["activities"]["summary"]["endpoint"].format(id=9766544337)
+                config["activities"]["summary"]["endpoint"].format(id=9766544337), params=None
             )
 
     def test_from_garmin_summary(self):

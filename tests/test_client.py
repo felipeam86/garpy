@@ -206,7 +206,7 @@ class TestGarminClient:
                 clg.get_activity(9766544337, fmt)
                 clg.session.get.assert_called_once()
                 clg.session.get.assert_called_with(
-                    parameters["endpoint"].format(id=9766544337)
+                    parameters["endpoint"].format(id=9766544337), params=None
                 )
 
                 # Test raised exception with 400 response code
@@ -219,7 +219,7 @@ class TestGarminClient:
 
                 clg.session.get.assert_called_once()
                 clg.session.get.assert_called_with(
-                    parameters["endpoint"].format(id=9766544337)
+                    parameters["endpoint"].format(id=9766544337), params=None
                 )
 
                 # Test error codes get tolerated
@@ -231,7 +231,7 @@ class TestGarminClient:
                         clg.get_activity(9766544337, fmt)
                         clg.session.get.assert_called_once()
                         clg.session.get.assert_called_with(
-                            parameters["endpoint"].format(id=9766544337)
+                            parameters["endpoint"].format(id=9766544337), params=None
                         )
 
     def test_get_activity_raises_error_unknown_format(self):
