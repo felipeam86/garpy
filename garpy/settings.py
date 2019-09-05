@@ -73,8 +73,15 @@ logger = get_logger(__name__)
 if len(config_files) > 0:
     logger.debug(f"Loaded configuration from the following file(s): {config_files}")
 
-# Format and typing of the config goes here, e.g.:
-# config['root_path'] = Path(config['root_path']).expanduser()
+class Password:
+    def __init__(self, password: str) -> None:
+        self.password = password or ''
+
+    def __repr__(self) -> str:
+        return '*' * len(self.password)
+
 
 # Format and typing of the config goes here, e.g.:
 config['backup-dir'] = Path('.').absolute() / config['backup-dir']
+if config.get('password') is not None:
+    config['password'] = Password(config.get('password'))
