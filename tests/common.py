@@ -9,8 +9,12 @@ def get_client_with_mocked_authenticate():
     return clg
 
 
-def get_mocked_request(status_code=200, func_name=None, text=None):
+def get_mocked_response(status_code, text):
     failed_response = Mock()
     failed_response.status_code = status_code
     failed_response.text = text or ""
-    return Mock(return_value=failed_response, name=func_name)
+    return failed_response
+
+
+def get_mocked_request(status_code=200, func_name=None, text=None):
+    return Mock(return_value=get_mocked_response(status_code, text), name=func_name)

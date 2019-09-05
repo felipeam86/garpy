@@ -1,0 +1,18 @@
+[
+  {
+    "activityId": 9766544337,
+    "activityName": "Morning ride",
+    "activityType": {
+      "typeKey": "cycling"
+    },
+    "startTimeGMT": "2017-02-24T08:00:00.0"
+  },
+  {
+    "activityId": 3452362357,
+    "activityName": "Evening swim",
+    "activityType": {
+      "typeKey": "lap_swimming"
+    },
+    "startTimeGMT": "2017-03-24T17:00:00.0"
+  }
+]

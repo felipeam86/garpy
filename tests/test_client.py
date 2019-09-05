@@ -1,12 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import json
+from pathlib import Path
+
 import pytest
 import requests
+from unittest.mock import Mock
 
 from garpy import client
 from garpy.settings import config
-from common import get_client_with_mocked_authenticate, get_mocked_request
+from common import (
+    get_client_with_mocked_authenticate,
+    get_mocked_request,
+    get_mocked_response
+)
+
+RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 
 
 class TestExtractAuthTicketUrl:
@@ -244,3 +254,20 @@ class TestGarminClient:
                 f"Parameters for downloading the format 'random_format' have not been provided."
                 in str(excinfo.value)
             )
+
+    def test_list_activities(self):
+        first_batch = (RESPONSE_EXAMPLES_PATH  / "list_activities.json").read_text()
+        clg = get_client_with_mocked_authenticate()
+        with clg:
+            clg.session.get = Mock(
+                side_effect=[
+                    get_mocked_response(200, first_batch),
+                    get_mocked_response(200, '[]')
+                ],
+                func_name="clg.session.get()"
+            )
+            activities = clg.list_activities()
+
+            assert clg.session.get.call_count == 2
+
+        assert activities == json.loads(first_batch)

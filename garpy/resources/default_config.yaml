@@ -2,6 +2,7 @@ garpy:
   backup-dir: 'activities'
   endpoints:
     SSO_LOGIN_URL: "https://sso.garmin.com/sso/signin"
+    ACTIVITY_LIST: "https://connect.garmin.com/modern/proxy/activitylist-service/activities/search/activities"
   activities:
     summary:
       endpoint: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}"

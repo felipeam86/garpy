@@ -10,7 +10,9 @@ https://github.com/petergardfjall/garminexport
 https://github.com/cpfair/tapiriik/blob/master/tapiriik/services/GarminConnect/garminconnect.py
 """
 
+import json
 import re
+import sys
 from typing import Tuple
 
 import attr
@@ -202,3 +204,19 @@ class GarminClient(object):
             tolerate=tuple(format_parameters.get("tolerate", tuple())),
         )
         return response
+
+    def list_activities(self):
+        batch_size = 100
+        activities = []
+        for start_index in range(0, sys.maxsize, batch_size):
+            response = self.get(
+                url=config["endpoints"]["ACTIVITY_LIST"],
+                params={"start": start_index, "limit": batch_size},
+                err_message=f"Failed to fetch activities {start_index} to {start_index + batch_size - 1}.",
+            )
+            next_batch = json.loads(response.text)
+            if not next_batch:
+                break
+            activities.extend(next_batch)
+
+        return activities
