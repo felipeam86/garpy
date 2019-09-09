@@ -3,8 +3,9 @@
 
 import json
 from pathlib import Path
+from unittest.mock import Mock
 
-from garpy import Activity
+from garpy import Activity, Activities
 from garpy.settings import config
 from common import get_client_with_mocked_authenticate, get_mocked_request
 
@@ -58,3 +59,23 @@ class TestActivity:
         assert activity.type == "walking"
         assert activity.name == "Random walking"
         assert activity.summary == activities[0]
+
+
+class TestActivities:
+    """activities.Activities"""
+
+    def test_list(self):
+
+        client = Mock()
+        client.list_activities = Mock(
+            return_value=json.loads(
+                (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
+            )
+        )
+        activities = Activities.list(client)
+
+        assert isinstance(activities, Activities)
+        assert activities[0].id == 2532452238
+        assert activities[0].type == "walking"
+        assert activities[0].name == "Random walking"
+        assert len(activities) == 10

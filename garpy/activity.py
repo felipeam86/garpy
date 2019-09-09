@@ -92,3 +92,12 @@ class Activity:
         activity = Activity.from_garmin_summary(activity_summary)
 
         return activity
+
+
+class Activities(list):
+    @classmethod
+    def list(cls, client: GarminClient):
+        return cls(
+            Activity.from_garmin_activity_list_entry(activity)
+            for activity in client.list_activities()
+        )
