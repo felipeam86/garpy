@@ -18,7 +18,7 @@ from typing import Tuple
 import attr
 import requests
 
-from .settings import config, get_logger
+from .settings import config, get_logger, Password
 
 logger = get_logger(__name__)
 ENDPOINTS = config["endpoints"]
@@ -84,8 +84,14 @@ class GarminClient(object):
     """
 
     username: str = attr.ib(default=config.get("username"))
-    password: str = attr.ib(default=config.get("password"), repr=False)
+    password: Password = attr.ib(default=config.get("password"), repr=False)
     session: requests.Session = attr.ib(default=None, repr=False)
+
+    @password.validator
+    def enforce_password(self, attribute, value):
+        """Make sure that self.password is cast into Password"""
+        if isinstance(value, str):
+            self.password = Password(value)
 
     def __enter__(self):
         self.connect()
@@ -116,7 +122,7 @@ class GarminClient(object):
             params={"service": "https://connect.garmin.com/modern"},
             data={
                 "username": self.username,
-                "password": self.password,
+                "password": self.password.get(),
                 "embed": "false",
             },
         )

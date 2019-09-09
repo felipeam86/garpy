@@ -9,7 +9,7 @@ import requests
 from unittest.mock import Mock
 
 from garpy import client
-from garpy.settings import config
+from garpy.settings import config, Password
 from common import (
     get_client_with_mocked_authenticate,
     get_mocked_request,
@@ -65,7 +65,7 @@ class TestGarminClient:
             clg.connect()
 
         err_msg = f"Missing credentials. Your forgot to provide username or password. " \
-                  f"username: ''. password: 'falsepassword'"
+                  f"username: ''. password: '*************'"
         assert err_msg in str(excinfo.value)
 
         clg = client.GarminClient(username="falseuser", password="")
@@ -108,7 +108,7 @@ class TestGarminClient:
 
         assert not clg.connected, "Client should have disconnected after with statement"
 
-    def test_authenticate(self):
+    def test_authenticate_with_string_password(self):
         """Test normal behavior of _authenticate"""
         clg = client.GarminClient(username="falseuser", password="falsepassword")
         clg.session = requests.Session()
@@ -121,6 +121,38 @@ class TestGarminClient:
             status_code=200, func_name="clg.session.get()"
         )
         clg.connect()
+
+    def test_authenticate_with_Password_password(self):
+        """Test normal behavior of _authenticate"""
+        clg = client.GarminClient(username="falseuser", password=Password("falsepassword"))
+        clg.session = requests.Session()
+        clg.session.post = get_mocked_request(
+            status_code=200,
+            func_name="clg.session.post()",
+            text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
+        )
+        clg.session.get = get_mocked_request(
+            status_code=200, func_name="clg.session.get()"
+        )
+        clg.connect()
+
+        clg.session.post.assert_called_with(
+            config["endpoints"]["SSO_LOGIN_URL"],
+            headers={"origin": "https://sso.garmin.com"},
+            params={"service": "https://connect.garmin.com/modern"},
+            data={
+                "username": 'falseuser',
+                "password": "falsepassword",
+                "embed": "false",
+            },
+        )
+
+        assert (
+            str(clg.password) == "*************"
+        ), "The password has not been succesfully hidden on string representation"
+        assert (
+            clg.password.get() == "falsepassword"
+        ), "The original password was not recovered with the .get() method"
 
     def test_authenticate_auth_ticket_fails_get_auth_ticket(self):
         """Test that _authenticate fails if it does not get auth ticket"""

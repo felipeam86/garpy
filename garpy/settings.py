@@ -73,12 +73,19 @@ logger = get_logger(__name__)
 if len(config_files) > 0:
     logger.debug(f"Loaded configuration from the following file(s): {config_files}")
 
+
 class Password:
     def __init__(self, password: str) -> None:
         self.password = password or ''
 
     def __repr__(self) -> str:
         return '*' * len(self.password)
+
+    def get(self) -> str:
+        return self.password
+
+    def __bool__(self):
+        return bool(self.password)
 
 
 # Format and typing of the config goes here, e.g.:
