@@ -87,6 +87,11 @@ class TestGarminClient:
     def test_authentication_fail_raises_error(self):
         """Test that .connect() raises ConnectionError with dummy credentials"""
         clg = client.GarminClient(username="falseuser", password="falsepassword")
+        clg.session = requests.Session()
+        clg.session.post = get_mocked_request(
+            status_code=400,
+            func_name="clg.session.post()",
+        )
         with pytest.raises(ConnectionError):
             clg.connect()
 
