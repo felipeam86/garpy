@@ -7,9 +7,6 @@ import attr
 import pendulum
 
 from .client import GarminClient
-from .settings import get_logger
-
-logger = get_logger(__name__)
 
 
 @attr.s

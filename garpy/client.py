@@ -11,6 +11,7 @@ https://github.com/cpfair/tapiriik/blob/master/tapiriik/services/GarminConnect/g
 """
 
 import json
+import logging
 import re
 import sys
 from typing import Tuple
@@ -18,9 +19,9 @@ from typing import Tuple
 import attr
 import requests
 
-from .settings import config, get_logger, Password
+from .settings import config, Password
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 ENDPOINTS = config["endpoints"]
 
 

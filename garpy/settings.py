@@ -2,10 +2,11 @@
 
 import collections
 import logging
-import sys
 from pathlib import Path
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 PACKAGE_NAME = 'garpy'
 
@@ -43,33 +44,6 @@ for config_file in extra_config_files:
         recursive_update(config, extra_config)
         config_files.append(config_file)
 
-
-def get_logger(name):
-
-    # Create logger
-    logger = logging.getLogger(name)
-
-    # Avoid duplicate handlers
-    logger.handlers = []
-
-    formatter = logging.Formatter(
-        '%(asctime)s-%(name)s-%(levelname)s - %(message)s',
-        '%Y-%m-%d-%H:%M:%S'
-    )
-    # Create STDERR handler
-    handler = logging.StreamHandler(sys.stderr)
-    handler.setFormatter(formatter)
-    handler.setLevel(logging.INFO)
-    logger.addHandler(handler)
-
-    # Prevent multiple logging if called from other packages
-    logger.propagate = False
-    logger.setLevel(logging.INFO)
-
-    return logger
-
-
-logger = get_logger(__name__)
 
 if len(config_files) > 0:
     logger.debug(f"Loaded configuration from the following file(s): {config_files}")
