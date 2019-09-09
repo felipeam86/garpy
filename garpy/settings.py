@@ -3,8 +3,9 @@
 import collections
 import logging
 import sys
-import yaml
 from pathlib import Path
+
+import yaml
 
 PACKAGE_NAME = 'garpy'
 

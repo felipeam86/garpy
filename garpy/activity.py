@@ -1,14 +1,13 @@
 #! /usr/bin/env python
 
 import json
-from pathlib import Path
 from typing import Any, Dict
 
 import attr
 import pendulum
 
 from .client import GarminClient
-from .settings import config, get_logger
+from .settings import get_logger
 
 logger = get_logger(__name__)
 
