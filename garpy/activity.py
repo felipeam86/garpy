@@ -67,6 +67,25 @@ class Activity:
         )
 
     @classmethod
+    def from_garmin_activity_list_entry(cls, entry: Dict[str, Any]):
+        """Constructor based on an entry from the list of activities from garmin connect.
+
+        Parameters
+        ----------
+        entry
+            JSON string representation of an entry of an activity list fetched from garmin connect
+        """
+
+        return cls(
+            id=entry["activityId"],
+            name=entry["activityName"],
+            type=entry["activityType"]["typeKey"],
+            # Unfortunately, Garmin connect does not provide timezone information on entries from list of activities
+            start=pendulum.parse(entry["startTimeGMT"]),
+            summary=entry,
+        )
+
+    @classmethod
     def from_garmin_connect(cls, activity_id: int, client: GarminClient):
         response = client.get_activity(activity_id, "summary")
         activity_summary = json.loads(response.text)

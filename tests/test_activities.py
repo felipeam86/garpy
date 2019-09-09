@@ -46,3 +46,15 @@ class TestActivity:
         assert activity.type == "cycling"
         assert activity.name == "Morning ride"
         assert activity.summary == summary
+
+    def test_from_garmin_activity_list_entry(self):
+        activities = json.loads(
+            (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
+        )
+
+        activity = Activity.from_garmin_activity_list_entry(activities[0])
+        assert isinstance(activity, Activity)
+        assert activity.id == 2532452238
+        assert activity.type == "walking"
+        assert activity.name == "Random walking"
+        assert activity.summary == activities[0]
