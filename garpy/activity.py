@@ -43,7 +43,7 @@ class Activity:
     name: str = attr.ib()
     type: str = attr.ib()
     start: pendulum.DateTime = attr.ib()
-    summary: Dict[str, Any] = attr.ib(default={})
+    summary: Dict[str, Any] = attr.ib(default={}, repr=False)
 
     @classmethod
     def from_garmin_summary(cls, summary: Dict[str, Any]):
