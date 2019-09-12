@@ -9,7 +9,7 @@ import pendulum
 from .client import GarminClient
 
 
-@attr.s
+@attr.s(frozen=True)
 class Activity:
     """Garmin activity identifier
 
