@@ -39,7 +39,6 @@ class Activity:
     name: str = attr.ib()
     type: str = attr.ib()
     start: pendulum.DateTime = attr.ib()
-    summary: Dict[str, Any] = attr.ib(default={}, repr=False)
 
     @classmethod
     def from_garmin_summary(cls, summary: Dict[str, Any]):
@@ -59,7 +58,6 @@ class Activity:
                 summary["summaryDTO"]["startTimeLocal"],
                 tz=summary["timeZoneUnitDTO"]["unitKey"],
             ),
-            summary=summary,
         )
 
     @classmethod
@@ -78,7 +76,6 @@ class Activity:
             type=entry["activityType"]["typeKey"],
             # Unfortunately, Garmin connect does not provide timezone information on entries from list of activities
             start=pendulum.parse(entry["startTimeGMT"]),
-            summary=entry,
         )
 
     @classmethod

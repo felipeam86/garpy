@@ -29,7 +29,6 @@ class TestActivity:
             assert activity.id == 9766544337
             assert activity.type == "cycling"
             assert activity.name == "Morning ride"
-            assert activity.summary == json.loads(expected_summary)
 
             clg.session.get.assert_called_once()
             clg.session.get.assert_called_with(
@@ -46,7 +45,6 @@ class TestActivity:
         assert activity.id == 9766544337
         assert activity.type == "cycling"
         assert activity.name == "Morning ride"
-        assert activity.summary == summary
 
     def test_from_garmin_activity_list_entry(self):
         activities = json.loads(
@@ -58,7 +56,6 @@ class TestActivity:
         assert activity.id == 2532452238
         assert activity.type == "walking"
         assert activity.name == "Random walking"
-        assert activity.summary == activities[0]
 
 
 class TestActivities:
