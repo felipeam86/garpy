@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import collections
 import logging
 from pathlib import Path
 
@@ -8,45 +7,15 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-PACKAGE_NAME = 'garpy'
 
-
-def recursive_update(d, u):
-    for k, v in u.items():
-        if isinstance(v, collections.Mapping):
-            d[k] = recursive_update(d.get(k, {}), v)
+def recursive_update(original_dict: dict, new_dict: dict) -> dict:
+    """Recursively update original_dict with new_dict"""
+    for new_key, new_value in new_dict.items():
+        if isinstance(new_value, dict):
+            original_dict[new_key] = recursive_update(original_dict.get(new_key, {}), new_value)
         else:
-            d[k] = v
-    return d
-
-
-def load_config_file(path: Path):
-    if path.exists():
-        return yaml.load(path.read_text(), Loader=yaml.FullLoader)\
-                   .get(PACKAGE_NAME, {})
-    else:
-        return {}
-
-
-default_config = Path(__file__).parent / 'resources' / 'default_config.yaml'
-config = load_config_file(default_config)
-
-extra_config_files = [
-    Path('/etc/garpy/config.yaml'),
-    Path('~/.config/garpy/config.yaml').expanduser(),
-    Path('config.yaml'),
-]
-
-config_files = []
-for config_file in extra_config_files:
-    extra_config = load_config_file(config_file)
-    if extra_config:
-        recursive_update(config, extra_config)
-        config_files.append(config_file)
-
-
-if len(config_files) > 0:
-    logger.debug(f"Loaded configuration from the following file(s): {config_files}")
+            original_dict[new_key] = new_value
+    return original_dict
 
 
 class Password:
@@ -62,8 +31,19 @@ class Password:
     def __bool__(self):
         return bool(self.password)
 
+# Configurations are loaded from the defaults of the package and eventually a local config.yaml file
+config_files = [
+    Path(__file__).parent / 'resources' / 'default_config.yaml',
+    Path('config.yaml'),
+]
 
-# Format and typing of the config goes here, e.g.:
-config['backup-dir'] = Path('.').absolute() / config['backup-dir']
-if config.get('password') is not None:
-    config['password'] = Password(config.get('password'))
+config = {}
+for config_file in config_files:
+    if config_file.exists():
+        new_config = yaml.safe_load(config_file.read_text())
+        if isinstance(new_config, dict):
+            config = recursive_update(config, new_config)
+
+
+config['backup-dir'] = Path(config['backup-dir']).absolute()
+config['password'] = Password(config.get('password'))

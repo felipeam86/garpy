@@ -1,28 +1,27 @@
-garpy:
-  backup-dir: 'activities'
-  endpoints:
-    SSO_LOGIN_URL: "https://sso.garmin.com/sso/signin"
-    ACTIVITY_LIST: "https://connect.garmin.com/modern/proxy/activitylist-service/activities/search/activities"
-  activities:
-    summary:
-      endpoint: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}"
-      suffix: "_summary.json"
-    details:
-      endpoint: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}/details"
-      suffix: "_details.json"
-    gpx:
-      endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/gpx/activity/{id}"
-      suffix: ".gpx"
-      tolerate:
-        - 404
-        - 204
-    tcx:
-      endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/tcx/activity/{id}"
-      suffix: ".tcx"
-      tolereta:
-        - 404
-    original:
-      endpoint: "https://connect.garmin.com/modern/proxy/download-service/files/activity/{id}"
-      tolerate:
-        - 404
-        - 500
+backup-dir: 'activities'
+endpoints:
+  SSO_LOGIN_URL: "https://sso.garmin.com/sso/signin"
+  ACTIVITY_LIST: "https://connect.garmin.com/modern/proxy/activitylist-service/activities/search/activities"
+activities:
+  summary:
+    endpoint: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}"
+    suffix: "_summary.json"
+  details:
+    endpoint: "https://connect.garmin.com/modern/proxy/activity-service/activity/{id}/details"
+    suffix: "_details.json"
+  gpx:
+    endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/gpx/activity/{id}"
+    suffix: ".gpx"
+    tolerate:
+      - 404
+      - 204
+  tcx:
+    endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/tcx/activity/{id}"
+    suffix: ".tcx"
+    tolereta:
+      - 404
+  original:
+    endpoint: "https://connect.garmin.com/modern/proxy/download-service/files/activity/{id}"
+    tolerate:
+      - 404
+      - 500
