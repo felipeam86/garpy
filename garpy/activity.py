@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 
 import json
+from pathlib import Path
 from typing import Any, Dict
 
 import attr
 import pendulum
 
 from .client import GarminClient
+from .settings import config
 
 
 @attr.s(frozen=True)
@@ -39,6 +41,18 @@ class Activity:
     name: str = attr.ib()
     type: str = attr.ib()
     start: pendulum.DateTime = attr.ib()
+
+    @property
+    def base_filename(self):
+        return f"{self.start.in_tz('UTC').isoformat()}_{self.id}"
+
+    def get_export_filepath(self, backup_dir: Path, fmt: str) -> Path:
+        format_parameters = config["activities"].get(fmt)
+        if not format_parameters:
+            raise ValueError(
+                f"Format '{fmt}' unknown."
+            )
+        return Path(backup_dir) / (self.base_filename + format_parameters["suffix"])
 
     @classmethod
     def from_garmin_summary(cls, summary: Dict[str, Any]):

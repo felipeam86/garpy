@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
+
 from garpy import Activity, Activities
 from garpy.settings import config
 from common import get_client_with_mocked_authenticate, get_mocked_request
@@ -56,6 +58,25 @@ class TestActivity:
         assert activity.id == 2532452238
         assert activity.type == "walking"
         assert activity.name == "Random walking"
+
+    def test_filepath_awareness(self):
+        activities = json.loads(
+            (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
+        )
+
+        activity = Activity.from_garmin_activity_list_entry(activities[0])
+        expected_base_filename = "2018-11-24T09:30:00+00:00_2532452238"
+        backup_dir = Path('/fake/path')
+        assert activity.base_filename == expected_base_filename
+        assert activity.get_export_filepath(backup_dir, 'gpx') == backup_dir / (expected_base_filename + '.gpx')
+
+        with pytest.raises(ValueError) as excinfo:
+            activity.get_export_filepath(backup_dir, 'unknown_format')
+        assert (
+            f"Format 'unknown_format' unknown."
+            in str(excinfo.value)
+        )
+
 
 
 class TestActivities:
