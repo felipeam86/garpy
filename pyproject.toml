@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Python client for downloading activities from Garmin Connect"
 authors = ["Felipe Aguirre Martinez <felipeam86@gmail.com>"]
 license = "MIT"
-readme = "README.md"
+readme = "README.rst"
 
 
 [tool.poetry.dependencies]
