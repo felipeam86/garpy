@@ -18,7 +18,7 @@ activities:
   tcx:
     endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/tcx/activity/{id}"
     suffix: ".tcx"
-    tolereta:
+    tolerate:
       - 404
   original:
     endpoint: "https://connect.garmin.com/modern/proxy/download-service/files/activity/{id}"
