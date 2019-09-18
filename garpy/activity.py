@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
 import json
+import zipfile
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict
 
@@ -99,6 +101,34 @@ class Activity:
         activity = Activity.from_garmin_summary(activity_summary)
 
         return activity
+
+    def download(self, client: GarminClient, fmt: str, backup_dir: Path) -> None:
+        """Download activity on the given format to the given backup directory
+
+        Parameters
+        ----------
+        client
+            Authentified GarminClient
+        fmt
+            Format you wish to download
+        backup_dir
+            Where to download the file
+        """
+        response = client.get_activity(self.id, fmt)
+        filepath = self.get_export_filepath(backup_dir, fmt)
+        if response.status_code == 200:
+            if fmt == "original":
+                zip_content = zipfile.ZipFile(BytesIO(response.content), mode="r")
+                original_file_name = zip_content.namelist()[0]
+                fit_bytes = zip_content.open(original_file_name).read()
+                # Change file extension to the one on the zipped file
+                filepath = filepath.with_suffix(Path(original_file_name).suffix)
+                filepath.write_bytes(fit_bytes)
+            else:
+                filepath.write_text(response.text)
+        else:
+            with open(str(Path(backup_dir) / ".not_found"), mode="a") as not_found:
+                not_found.write(str(filepath.name) + "\n")
 
 
 class Activities(list):

@@ -22,6 +22,7 @@ activities:
       - 404
   original:
     endpoint: "https://connect.garmin.com/modern/proxy/download-service/files/activity/{id}"
+    suffix: ".fit"
     tolerate:
       - 404
       - 500
