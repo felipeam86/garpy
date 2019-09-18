@@ -8,10 +8,11 @@ import pytest
 import requests
 from unittest.mock import Mock
 
-from garpy import client
+from garpy.client import extract_auth_ticket_url
+from garpy import GarminClient
 from garpy.settings import config, Password
 from common import (
-    get_client_with_mocked_authenticate,
+    client,
     get_mocked_request,
     get_mocked_response
 )
@@ -22,7 +23,7 @@ RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 class TestExtractAuthTicketUrl:
     def test_with_good_response(self):
         auth_response_extract = 'var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";'
-        url = client.extract_auth_ticket_url(auth_response_extract)
+        url = extract_auth_ticket_url(auth_response_extract)
         assert (
             url
             == "https://connect.garmin.com/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas"
@@ -34,7 +35,7 @@ class TestExtractAuthTicketUrl:
             auth_response_extract = (
                 "Random response that does not contain the authentication ticket"
             )
-            url = client.extract_auth_ticket_url(auth_response_extract)
+            url = extract_auth_ticket_url(auth_response_extract)
         assert (
             "auth failure: unable to extract auth ticket URL. did you provide a correct username/password?"
             in str(excinfo.value)
@@ -44,41 +45,40 @@ class TestExtractAuthTicketUrl:
 class TestGarminClient:
     """client.GarminClient"""
 
-    def test_connect_and_disconnet(self):
+    def test_connect_and_disconnet(self, client):
         """Test expected behavior of .connect() and disconnect()"""
-        clg = get_client_with_mocked_authenticate()
 
-        assert not clg.connected, "Client should not be connected"
-        clg.connect()
-        clg._authenticate.assert_called_once()
+        assert not client.connected, "Client should not be connected"
+        client.connect()
+        client._authenticate.assert_called_once()
         assert (
-            clg.connected
+            client.connected
         ), "Client should be connected after authentication"
-        clg.disconnect()
-        assert not clg.connected, "Client should be disconnected after disconnecting"
+        client.disconnect()
+        assert not client.connected, "Client should be disconnected after disconnecting"
 
     def test_connect_fails_with_empty_username_password(self):
         """Test that .connect() raises ConnectionError with missing/empty credentials"""
 
-        clg = client.GarminClient(username="", password="falsepassword")
+        client = GarminClient(username="", password="falsepassword")
         with pytest.raises(ConnectionError) as excinfo:
-            clg.connect()
+            client.connect()
 
         err_msg = f"Missing credentials. Your forgot to provide username or password. " \
                   f"username: ''. password: '*************'"
         assert err_msg in str(excinfo.value)
 
-        clg = client.GarminClient(username="falseuser", password="")
+        client = GarminClient(username="falseuser", password="")
         with pytest.raises(ConnectionError) as excinfo:
-            clg.connect()
+            client.connect()
 
         err_msg = f"Missing credentials. Your forgot to provide username or password. " \
                   f"username: 'falseuser'. password: ''"
         assert err_msg in str(excinfo.value)
 
-        clg = client.GarminClient(username="", password="")
+        client = GarminClient(username="", password="")
         with pytest.raises(ConnectionError) as excinfo:
-            clg.connect()
+            client.connect()
 
         err_msg = f"Missing credentials. Your forgot to provide username or password. " \
                   f"username: ''. password: ''"
@@ -86,57 +86,55 @@ class TestGarminClient:
 
     def test_authentication_fail_raises_error(self):
         """Test that .connect() raises ConnectionError with dummy credentials"""
-        clg = client.GarminClient(username="falseuser", password="falsepassword")
-        clg.session = requests.Session()
-        clg.session.post = get_mocked_request(
+        client = GarminClient(username="falseuser", password="falsepassword")
+        client.session = requests.Session()
+        client.session.post = get_mocked_request(
             status_code=400,
-            func_name="clg.session.post()",
+            func_name="client.session.post()",
         )
         with pytest.raises(ConnectionError):
-            clg.connect()
+            client.connect()
 
-    def test_client_context_manager_session_management(self):
+    def test_client_context_manager_session_management(self, client):
         """Test that context managers creates and destroys the session"""
-
-        clg = get_client_with_mocked_authenticate()
-        assert not clg.connected, "Client should not be connected"
-        with clg:
-            clg._authenticate.assert_called_once()
+        assert not client.connected, "Client should not be connected"
+        with client:
+            client._authenticate.assert_called_once()
             assert (
-                clg.connected
+                client.connected
             ), "The client should be connected within the with statement"
 
-        assert not clg.connected, "Client should have disconnected after with statement"
+        assert not client.connected, "Client should have disconnected after with statement"
 
     def test_authenticate_with_string_password(self):
         """Test normal behavior of _authenticate"""
-        clg = client.GarminClient(username="falseuser", password="falsepassword")
-        clg.session = requests.Session()
-        clg.session.post = get_mocked_request(
+        client = GarminClient(username="falseuser", password="falsepassword")
+        client.session = requests.Session()
+        client.session.post = get_mocked_request(
             status_code=200,
-            func_name="clg.session.post()",
+            func_name="client.session.post()",
             text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
         )
-        clg.session.get = get_mocked_request(
-            status_code=200, func_name="clg.session.get()"
+        client.session.get = get_mocked_request(
+            status_code=200, func_name="client.session.get()"
         )
-        clg.connect()
+        client.connect()
 
     def test_authenticate_with_Password_password(self):
         """Test normal behavior of _authenticate"""
-        clg = client.GarminClient(username="falseuser", password=Password("falsepassword"))
-        clg.session = requests.Session()
-        clg.session.post = get_mocked_request(
+        client = GarminClient(username="falseuser", password=Password("falsepassword"))
+        client.session = requests.Session()
+        client.session.post = get_mocked_request(
             status_code=200,
-            func_name="clg.session.post()",
+            func_name="client.session.post()",
             text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
         )
-        clg.session.get = get_mocked_request(
-            status_code=200, func_name="clg.session.get()"
+        client.session.get = get_mocked_request(
+            status_code=200, func_name="client.session.get()"
         )
-        clg.connect()
+        client.connect()
 
-        clg.session.post.assert_called_with(
+        client.session.post.assert_called_with(
             config["endpoints"]["SSO_LOGIN_URL"],
             headers={"origin": "https://sso.garmin.com"},
             params={"service": "https://connect.garmin.com/modern"},
@@ -148,163 +146,156 @@ class TestGarminClient:
         )
 
         assert (
-            str(clg.password) == "*************"
+            str(client.password) == "*************"
         ), "The password has not been succesfully hidden on string representation"
         assert (
-            clg.password.get() == "falsepassword"
+            client.password.get() == "falsepassword"
         ), "The original password was not recovered with the .get() method"
 
     def test_authenticate_auth_ticket_fails_get_auth_ticket(self):
         """Test that _authenticate fails if it does not get auth ticket"""
-        clg = client.GarminClient(username="falseuser", password="falsepassword")
-        clg.session = requests.Session()
-        clg.session.post = get_mocked_request(
+        client = GarminClient(username="falseuser", password="falsepassword")
+        client.session = requests.Session()
+        client.session.post = get_mocked_request(
             status_code=200,
-            func_name="clg.session.post()",
+            func_name="client.session.post()",
             text="Random response that does not contain the authentication ticket",
         )
-        clg.session.get = get_mocked_request(
-            status_code=200, func_name="clg.session.get()"
+        client.session.get = get_mocked_request(
+            status_code=200, func_name="client.session.get()"
         )
         with pytest.raises(ConnectionError) as excinfo:
-            clg.connect()
+            client.connect()
         err_msg = "auth failure: unable to extract auth ticket URL. did you provide a correct username/password?"
         assert err_msg in str(excinfo.value)
 
     def test_authenticate_auth_ticket_fails_on_post(self):
         """Test that _authenticate fails if it does not get auth ticket"""
-        clg = client.GarminClient(username="falseuser", password="falsepassword")
-        clg.session = requests.Session()
-        clg.session.post = get_mocked_request(
-            status_code=404, func_name="clg.session.post()"
+        client = GarminClient(username="falseuser", password="falsepassword")
+        client.session = requests.Session()
+        client.session.post = get_mocked_request(
+            status_code=404, func_name="client.session.post()"
         )
-        clg.session.get = get_mocked_request(
-            status_code=200, func_name="clg.session.get()"
+        client.session.get = get_mocked_request(
+            status_code=200, func_name="client.session.get()"
         )
         with pytest.raises(ConnectionError) as excinfo:
-            clg.connect()
+            client.connect()
         err_msg = "authentication failure: did you enter valid credentials?"
         assert err_msg in str(excinfo.value)
 
     def test_authenticate_auth_ticket_fails_on_get(self):
         """Test that _authenticate fails if it does not get auth ticket"""
-        clg = client.GarminClient(username="falseuser", password="falsepassword")
-        clg.session = requests.Session()
-        clg.session.post = get_mocked_request(
+        client = GarminClient(username="falseuser", password="falsepassword")
+        client.session = requests.Session()
+        client.session.post = get_mocked_request(
             status_code=200,
-            func_name="clg.session.post()",
+            func_name="client.session.post()",
             text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
         )
-        clg.session.get = get_mocked_request(
-            status_code=404, func_name="clg.session.get()"
+        client.session.get = get_mocked_request(
+            status_code=404, func_name="client.session.get()"
         )
         with pytest.raises(ConnectionError) as excinfo:
-            clg.connect()
+            client.connect()
         err_msg = "auth failure: failed to claim auth ticket:"
         assert err_msg in str(excinfo.value)
 
-    def test_get(self):
-        clg = get_client_with_mocked_authenticate()
-        with clg:
-            clg.session.get = get_mocked_request(
-                status_code=200, func_name="clg.session.get()", text="I'm working"
+    def test_get(self, client):
+        with client:
+            client.session.get = get_mocked_request(
+                status_code=200, func_name="client.session.get()", text="I'm working"
             )
-            response = clg.get(url="dummy_url", err_message="")
+            response = client.get(url="dummy_url", err_message="")
             assert response.text == "I'm working"
 
-    def test_get_raises_exception_on_non_authed_session(self):
+    def test_get_raises_exception_on_non_authed_session(self, client):
         """Test that .get() command only works with authenticated sessions"""
         with pytest.raises(ConnectionError) as excinfo:
-            clg = get_client_with_mocked_authenticate()
-            clg.get(url="dummy_url", err_message="")
+            client.get(url="dummy_url", err_message="")
         assert (
             "Attempt to use GarminClient without being connected. Call connect() before first use."
             in str(excinfo.value)
         )
 
-    def test_get_raises_error_with_status_code_different_200(self):
-        clg = get_client_with_mocked_authenticate()
-        with clg:
-            clg.session.get = get_mocked_request(
-                status_code=404, func_name="clg.session.get()"
+    def test_get_raises_error_with_status_code_different_200(self, client):
+        with client:
+            client.session.get = get_mocked_request(
+                status_code=404, func_name="client.session.get()"
             )
             with pytest.raises(ConnectionError) as excinfo:
-                clg.get(url="dummy_url", err_message="")
+                client.get(url="dummy_url", err_message="")
             assert f"Response code: 404" in str(excinfo.value)
-            clg.session.get.assert_called_once()
+            client.session.get.assert_called_once()
 
-    def test_get_tolerates_error_codes(self):
-        clg = get_client_with_mocked_authenticate()
-        with clg:
-            clg.session.get = get_mocked_request(
-                status_code=404, func_name="clg.session.get()"
+    def test_get_tolerates_error_codes(self, client):
+        with client:
+            client.session.get = get_mocked_request(
+                status_code=404, func_name="client.session.get()"
             )
-            clg.get(url="dummy_url", err_message="", tolerate=(404,))
-            clg.session.get.assert_called_once()
+            client.get(url="dummy_url", err_message="", tolerate=(404,))
+            client.session.get.assert_called_once()
 
-    def test_get_activity(self):
-        clg = get_client_with_mocked_authenticate()
-        with clg:
+    def test_get_activity(self, client):
+        with client:
             for fmt, parameters in config["activities"].items():
                 # Test normal behavior with 200 response code
-                clg.session.get = get_mocked_request(
-                    status_code=200, func_name="clg.session.get()"
+                client.session.get = get_mocked_request(
+                    status_code=200, func_name="client.session.get()"
                 )
-                clg.get_activity(9766544337, fmt)
-                clg.session.get.assert_called_once()
-                clg.session.get.assert_called_with(
+                client.get_activity(9766544337, fmt)
+                client.session.get.assert_called_once()
+                client.session.get.assert_called_with(
                     parameters["endpoint"].format(id=9766544337), params=None
                 )
 
                 # Test raised exception with 400 response code
-                clg.session.get = get_mocked_request(
-                    status_code=400, func_name="clg.session.get()"
+                client.session.get = get_mocked_request(
+                    status_code=400, func_name="client.session.get()"
                 )
                 with pytest.raises(ConnectionError) as excinfo:
-                    clg.get_activity(9766544337, fmt)
+                    client.get_activity(9766544337, fmt)
                 assert f"Response code: 400" in str(excinfo.value)
 
-                clg.session.get.assert_called_once()
-                clg.session.get.assert_called_with(
+                client.session.get.assert_called_once()
+                client.session.get.assert_called_with(
                     parameters["endpoint"].format(id=9766544337), params=None
                 )
 
                 # Test error codes get tolerated
                 if parameters.get("tolerate") is not None:
                     for code in parameters.get("tolerate"):
-                        clg.session.get = get_mocked_request(
-                            status_code=code, func_name="clg.session.get()"
+                        client.session.get = get_mocked_request(
+                            status_code=code, func_name="client.session.get()"
                         )
-                        clg.get_activity(9766544337, fmt)
-                        clg.session.get.assert_called_once()
-                        clg.session.get.assert_called_with(
+                        client.get_activity(9766544337, fmt)
+                        client.session.get.assert_called_once()
+                        client.session.get.assert_called_with(
                             parameters["endpoint"].format(id=9766544337), params=None
                         )
 
-    def test_get_activity_raises_error_unknown_format(self):
-        clg = get_client_with_mocked_authenticate()
-        with clg:
+    def test_get_activity_raises_error_unknown_format(self, client):
+        with client:
             with pytest.raises(ValueError) as excinfo:
-                clg.get_activity(9766544337, "random_format")
+                client.get_activity(9766544337, "random_format")
 
             assert (
                 f"Parameters for downloading the format 'random_format' have not been provided."
                 in str(excinfo.value)
             )
 
-    def test_list_activities(self):
+    def test_list_activities(self, client):
         first_batch = (RESPONSE_EXAMPLES_PATH  / "list_activities.json").read_text()
-        clg = get_client_with_mocked_authenticate()
-        with clg:
-            clg.session.get = Mock(
+        with client:
+            client.session.get = Mock(
                 side_effect=[
                     get_mocked_response(200, first_batch),
                     get_mocked_response(200, '[]')
                 ],
-                func_name="clg.session.get()"
+                func_name="client.session.get()"
             )
-            activities = clg.list_activities()
+            activities = client.list_activities()
 
-            assert clg.session.get.call_count == 2
+            assert client.session.get.call_count == 2
 
         assert activities == json.loads(first_batch)

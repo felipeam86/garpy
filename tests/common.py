@@ -1,10 +1,12 @@
+import pytest
 from unittest.mock import Mock
 
-from garpy import client
+from garpy import GarminClient
 
 
-def get_client_with_mocked_authenticate():
-    clg = client.GarminClient(username="dummy", password="dummy")
+@pytest.fixture
+def client():
+    clg = GarminClient(username="dummy", password="dummy")
     clg._authenticate = Mock(return_value=None, name="clg._authenticate()")
     return clg
 
