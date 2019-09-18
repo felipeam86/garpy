@@ -43,7 +43,8 @@ class TestActivity:
 
             client.session.get.assert_called_once()
             client.session.get.assert_called_with(
-                config["activities"]["summary"]["endpoint"].format(id=9766544337), params=None
+                config["activities"]["summary"]["endpoint"].format(id=9766544337),
+                params=None,
             )
 
     def test_from_garmin_summary(self):
@@ -68,20 +69,18 @@ class TestActivity:
         assert activity.type == "walking"
         assert activity.name == "Random walking"
 
-    def test_filepath_awareness(self, activity):
+    def test_filepath_awareness(self, activity, tmp_path):
         expected_base_filename = "2018-11-24T09:30:00+00:00_2532452238"
-        backup_dir = Path('/fake/path')
         assert activity.base_filename == expected_base_filename
-        assert activity.get_export_filepath(backup_dir, 'gpx') == backup_dir / (expected_base_filename + '.gpx')
-
-        with pytest.raises(ValueError) as excinfo:
-            activity.get_export_filepath(backup_dir, 'unknown_format')
-        assert (
-            f"Format 'unknown_format' unknown."
-            in str(excinfo.value)
+        assert activity.get_export_filepath(tmp_path, "gpx") == tmp_path / (
+            expected_base_filename + ".gpx"
         )
 
-    def test_download_gpx(self, activity, client):
+        with pytest.raises(ValueError) as excinfo:
+            activity.get_export_filepath(tmp_path, "unknown_format")
+        assert f"Format 'unknown_format' unknown." in str(excinfo.value)
+
+    def test_download_gpx(self, activity, client, tmp_path):
         with client:
             client.session.get = Mock(
                 return_value=get_mocked_response(
@@ -89,20 +88,17 @@ class TestActivity:
                 ),
                 func_name="client.session.get()",
             )
-            with tempfile.TemporaryDirectory() as backup_dir:
-                fmt = "gpx"
-                activity.download(client, fmt, backup_dir)
-                expected_downloaded_file_path = activity.get_export_filepath(
-                    backup_dir, fmt
-                )
-                assert expected_downloaded_file_path.exists()
-                assert not (Path(backup_dir) / ".not_found").exists()
-                assert (
-                    expected_downloaded_file_path.read_text()
-                    == "Trust me, this is a GPX file"
-                )
+            fmt = "gpx"
+            activity.download(client, fmt, tmp_path)
+            expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
+            assert expected_downloaded_file_path.exists()
+            assert not (Path(tmp_path) / ".not_found").exists()
+            assert (
+                expected_downloaded_file_path.read_text()
+                == "Trust me, this is a GPX file"
+            )
 
-    def test_download_original(self, activity, client):
+    def test_download_original(self, activity, client, tmp_path):
         with client:
             response_of_original = (
                 RESPONSE_EXAMPLES_PATH / "example_original_with_fit.zip"
@@ -117,36 +113,28 @@ class TestActivity:
                 return_value=get_mocked_response(200, content=response_of_original),
                 func_name="client.session.get()",
             )
-            with tempfile.TemporaryDirectory() as backup_dir:
-                fmt = "original"
-                activity.download(client, fmt, backup_dir)
-                expected_downloaded_file_path = activity.get_export_filepath(
-                    backup_dir, fmt
-                )
-                assert expected_downloaded_file_path.exists()
-                assert not (Path(backup_dir) / ".not_found").exists()
-                assert (
-                    expected_downloaded_file_path.read_bytes()
-                    == fit_inside_original_zip
-                )
+            fmt = "original"
+            activity.download(client, fmt, tmp_path)
+            expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
+            assert expected_downloaded_file_path.exists()
+            assert not (Path(tmp_path) / ".not_found").exists()
+            assert expected_downloaded_file_path.read_bytes() == fit_inside_original_zip
 
-    def test_download_inexistent_gpx(self, activity, client):
+    def test_download_inexistent_gpx(self, activity, client, tmp_path):
         with client:
             client.session.get = Mock(
                 return_value=get_mocked_response(404), func_name="client.session.get()"
             )
-            with tempfile.TemporaryDirectory() as backup_dir:
-                fmt = "gpx"
-                activity.download(client, fmt, backup_dir)
-                expected_downloaded_file_path = activity.get_export_filepath(
-                    backup_dir, fmt
-                )
-                assert not expected_downloaded_file_path.exists()
-                assert (Path(backup_dir) / ".not_found").exists()
-                assert (
-                    expected_downloaded_file_path.name
-                    in (Path(backup_dir) / ".not_found").read_text()
-                )
+            fmt = "gpx"
+            activity.download(client, fmt, tmp_path)
+            expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
+            assert not expected_downloaded_file_path.exists()
+            assert (Path(tmp_path) / ".not_found").exists()
+            assert (
+                expected_downloaded_file_path.name
+                in (Path(tmp_path) / ".not_found").read_text()
+            )
+
 
 class TestActivities:
     """activities.Activities"""

@@ -116,6 +116,8 @@ class Activity:
         """
         response = client.get_activity(self.id, fmt)
         filepath = self.get_export_filepath(backup_dir, fmt)
+        backup_dir = Path(backup_dir)
+        backup_dir.mkdir(exist_ok=True)
         if response.status_code == 200:
             if fmt == "original":
                 zip_content = zipfile.ZipFile(BytesIO(response.content), mode="r")
