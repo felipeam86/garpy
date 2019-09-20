@@ -2,26 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import json
-import pytest
-import tempfile
 import zipfile
-from io import BytesIO
 from pathlib import Path
 from unittest.mock import Mock
 
-from common import client, get_mocked_request, get_mocked_response
+import pytest
+from common import client, activity, get_mocked_request, get_mocked_response, get_activity
+
 from garpy import Activity, Activities
 from garpy.settings import config
 
 RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
-
-
-@pytest.fixture
-def activity():
-    activities = json.loads(
-        (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
-    )
-    return Activity.from_garmin_activity_list_entry(activities[0])
 
 
 class TestActivity:
@@ -82,12 +73,7 @@ class TestActivity:
 
     def test_download_gpx(self, activity, client, tmp_path):
         with client:
-            client.session.get = Mock(
-                return_value=get_mocked_response(
-                    200, text="Trust me, this is a GPX file"
-                ),
-                func_name="client.session.get()",
-            )
+            client.get_activity = get_activity
             fmt = "gpx"
             activity.download(client, fmt, tmp_path)
             expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
@@ -95,29 +81,19 @@ class TestActivity:
             assert not (Path(tmp_path) / ".not_found").exists()
             assert (
                 expected_downloaded_file_path.read_text()
-                == "Trust me, this is a GPX file"
+                == f"Trust me, this is a {fmt!r} file for activity {activity.id!r}"
             )
 
     def test_download_original(self, activity, client, tmp_path):
         with client:
-            response_of_original = (
-                RESPONSE_EXAMPLES_PATH / "example_original_with_fit.zip"
-            ).read_bytes()
-            response_of_original_content = zipfile.ZipFile(
-                BytesIO(response_of_original), mode="r"
-            )
-            fit_inside_original_zip = response_of_original_content.open(
-                response_of_original_content.namelist()[0]
-            ).read()
-            client.session.get = Mock(
-                return_value=get_mocked_response(200, content=response_of_original),
-                func_name="client.session.get()",
-            )
+            client.get_activity = get_activity
             fmt = "original"
             activity.download(client, fmt, tmp_path)
             expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
             assert expected_downloaded_file_path.exists()
             assert not (Path(tmp_path) / ".not_found").exists()
+            zipped_file = zipfile.ZipFile(RESPONSE_EXAMPLES_PATH / "example_original_with_fit.zip", mode="r")
+            fit_inside_original_zip = zipped_file.open(zipped_file.namelist()[0]).read()
             assert expected_downloaded_file_path.read_bytes() == fit_inside_original_zip
 
     def test_download_inexistent_gpx(self, activity, client, tmp_path):
