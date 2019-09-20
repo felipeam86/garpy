@@ -23,6 +23,17 @@ def client():
     return clg
 
 
+@pytest.fixture
+def client_activities(client):
+    activities = json.loads(
+        (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
+    )
+    assert len(activities) == 10
+    client.list_activities = Mock(return_value=activities)
+    client.get_activity = Mock(side_effect=get_activity)
+    return client
+
+
 def get_mocked_response(status_code, text=None, content=None):
     failed_response = Mock()
     failed_response.status_code = status_code
@@ -44,7 +55,12 @@ def get_activity(activity_id, fmt):
             ).read_bytes(),
         )
     else:
+        if (fmt == 'summary') and (activity_id == 9766544337):
+            text = (RESPONSE_EXAMPLES_PATH / "summary_9766544337.json").read_text()
+        else:
+            text = f"Trust me, this is a {fmt!r} file for activity {activity_id!r}"
+
         return get_mocked_response(
             status_code=200,
-            text=f"Trust me, this is a {fmt!r} file for activity {activity_id!r}",
+            text=text,
         )

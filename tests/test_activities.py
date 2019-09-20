@@ -7,10 +7,9 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from common import client, activity, get_mocked_request, get_mocked_response, get_activity
+from common import client, client_activities, activity, get_mocked_request, get_mocked_response, get_activity
 
 from garpy import Activity, Activities
-from garpy.settings import config
 
 RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 
@@ -18,25 +17,16 @@ RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 class TestActivity:
     """activities.Activity"""
 
-    def test_from_garmin_connect(self, client):
-        with client:
-            expected_summary = (
-                RESPONSE_EXAMPLES_PATH / "summary_9766544337.json"
-            ).read_text()
-            client.session.get = get_mocked_request(
-                status_code=200, func_name="client.session.get()", text=expected_summary
-            )
-            activity = Activity.from_garmin_connect(9766544337, client)
+    def test_from_garmin_connect(self, client_activities):
+        with client_activities:
+            activity = Activity.from_garmin_connect(9766544337, client_activities)
             assert isinstance(activity, Activity)
             assert activity.id == 9766544337
             assert activity.type == "cycling"
             assert activity.name == "Morning ride"
 
-            client.session.get.assert_called_once()
-            client.session.get.assert_called_with(
-                config["activities"]["summary"]["endpoint"].format(id=9766544337),
-                params=None,
-            )
+            client_activities.get_activity.assert_called_once()
+            client_activities.get_activity.assert_called_with(9766544337, "summary")
 
     def test_from_garmin_summary(self):
         summary = json.loads(
@@ -49,7 +39,7 @@ class TestActivity:
         assert activity.type == "cycling"
         assert activity.name == "Morning ride"
 
-    def test_from_garmin_activity_list_entry(self, activity):
+    def test_from_garmin_activity_list_entry(self):
         activities = json.loads(
             (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
         )
@@ -71,11 +61,12 @@ class TestActivity:
             activity.get_export_filepath(tmp_path, "unknown_format")
         assert f"Format 'unknown_format' unknown." in str(excinfo.value)
 
-    def test_download_gpx(self, activity, client, tmp_path):
-        with client:
-            client.get_activity = get_activity
+    def test_download_gpx(self, activity, client_activities, tmp_path):
+        with client_activities:
             fmt = "gpx"
-            activity.download(client, fmt, tmp_path)
+            activity.download(client_activities, fmt, tmp_path)
+            client_activities.get_activity.assert_called_with(activity.id, fmt)
+            client_activities.get_activity.assert_called_once()
             expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
             assert expected_downloaded_file_path.exists()
             assert not (Path(tmp_path) / ".not_found").exists()
@@ -84,11 +75,12 @@ class TestActivity:
                 == f"Trust me, this is a {fmt!r} file for activity {activity.id!r}"
             )
 
-    def test_download_original(self, activity, client, tmp_path):
-        with client:
-            client.get_activity = get_activity
+    def test_download_original(self, activity, client_activities, tmp_path):
+        with client_activities:
             fmt = "original"
-            activity.download(client, fmt, tmp_path)
+            activity.download(client_activities, fmt, tmp_path)
+            client_activities.get_activity.assert_called_with(activity.id, fmt)
+            client_activities.get_activity.assert_called_once()
             expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
             assert expected_downloaded_file_path.exists()
             assert not (Path(tmp_path) / ".not_found").exists()
@@ -115,15 +107,9 @@ class TestActivity:
 class TestActivities:
     """activities.Activities"""
 
-    def test_list(self):
+    def test_list(self, client_activities):
 
-        client = Mock()
-        client.list_activities = Mock(
-            return_value=json.loads(
-                (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
-            )
-        )
-        activities = Activities.list(client)
+        activities = Activities.list(client_activities)
 
         assert isinstance(activities, Activities)
         assert activities[0].id == 2532452238
