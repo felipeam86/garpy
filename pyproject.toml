@@ -13,6 +13,7 @@ requests = "^2.22"
 attrs = "^19.1"
 pendulum = "^2.0"
 PyYAML = "^5.1"
+tqdm = "^4.36"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
