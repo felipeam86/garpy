@@ -28,18 +28,29 @@ def main():
     "-u",
     prompt=True,
     default=config.get("username"),
-    metavar="[Garmin connect username/email]",
+    metavar="{username}",
+    help="Username of your Garmin account",
 )
 @click.option(
     "--password",
     "-p",
     prompt=True,
     default=config.get("password"),
-    metavar="[Garmin connect password]",
+    metavar="{password}",
+    help="Password of your Garmin account",
     hide_input=True,
 )
 def download(backup_dir, formats, username, password):
-    """Download activities from Garmin Connect"""
+    """Download activities from Garmin Connect
+
+    Entry point for downloading activities from Garmin Connect. By default, it downloads all
+    newly created activities since the last time you did a backup.
+
+    If no format is specified, the app will download all possible formats. Otherwise you can specify the
+    formats you wish to download with the "-f/--formats" flag. The flag can be used several  times if you
+    wish to specify several formats, e.g., 'garpy download [OPTIONS] -f original -f gpx [BACKUP_DIR]' will
+    download .fit and .gpx files
+    """
     if 'fit' in formats:
         formats = set(formats)
         formats.remove('fit')
