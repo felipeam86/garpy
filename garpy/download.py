@@ -65,9 +65,10 @@ class ActivitiesDownloader:
         return to_download
 
     def download(self, formats: tuple = DEFAULT_FORMATS):
+        logger.info(f"Downloading the following formats: {formats!r} to this folder: {self.backup_dir}")
         to_download = self._discover_formats_to_download(formats)
         if not to_download:
-            logger.info("All activities have been already backed up")
+            logger.info("Backup folder up to date. No activities will be downloaded")
             return
 
         n_activities = len(to_download)

@@ -116,7 +116,7 @@ class GarminClient(object):
             self.session = None
 
     def _authenticate(self):
-        logger.info("authenticating user ...")
+        logger.info(f"Authenticating {self!r}")
         auth_response = self.session.post(
             ENDPOINTS["SSO_LOGIN_URL"],
             headers={"origin": "https://sso.garmin.com"},
@@ -134,7 +134,7 @@ class GarminClient(object):
             )
         auth_ticket_url = extract_auth_ticket_url(auth_response.text)
 
-        logger.info("claiming auth ticket ...")
+        logger.info("Claiming auth ticket")
         response = self.session.get(auth_ticket_url)
         if response.status_code != 200:
             raise ConnectionError(
