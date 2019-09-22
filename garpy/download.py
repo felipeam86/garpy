@@ -70,13 +70,17 @@ class ActivitiesDownloader:
             logger.info("All activities have been already backed up")
             return
 
-        logger.info(f"{len(to_download)} activities to be downloaded")
+        n_activities = len(to_download)
+        logger.info(f"{n_activities} activities to be downloaded")
 
         to_download = progressbar(to_download.items())
-        for activity, formats in to_download:
-            to_download.desc = f"Downloading activity {activity.id!r}"
+        for i, (activity, formats) in enumerate(to_download):
+            to_download.desc = (
+                f"Downloading activity {activity.id!r} "
+                f"from {activity.start.format('YYYY-MM-DD')}. Formats: {formats!r}"
+            )
             to_download.display()
-            formats = progressbar(formats, leave=False)
+            formats = progressbar(formats, leave=(i + 1 == n_activities))
             for fmt in formats:
                 formats.desc = f"Downloading format {fmt!r}"
                 formats.display()
