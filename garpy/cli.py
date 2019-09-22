@@ -27,6 +27,7 @@ def main():
     prompt=True,
     default=config.get("password"),
     metavar="[Garmin connect password]",
+    hide_input=True,
 )
 def download(backup_dir, formats, username, password):
     """Download activities from Garmin Connect"""
