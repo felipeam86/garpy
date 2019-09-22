@@ -6,6 +6,8 @@ authors = ["Felipe Aguirre Martinez <felipeam86@gmail.com>"]
 license = "MIT"
 readme = "README.rst"
 
+[tool.poetry.scripts]
+garpy = "garpy.cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.6"
@@ -13,6 +15,7 @@ requests = "^2.22"
 attrs = "^19.1"
 pendulum = "^2.0"
 PyYAML = "^5.1"
+click = "^7.0"
 tqdm = "^4.36"
 
 [tool.poetry.dev-dependencies]
