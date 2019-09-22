@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "garpy"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python client for downloading activities from Garmin Connect"
 authors = ["Felipe Aguirre Martinez <felipeam86@gmail.com>"]
 license = "MIT"
