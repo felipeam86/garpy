@@ -126,6 +126,11 @@ class Activity:
                 # Change file extension to the one on the zipped file
                 filepath = filepath.with_suffix(Path(original_file_name).suffix)
                 filepath.write_bytes(fit_bytes)
+
+                # If original format is not FIT, register it as not found
+                if filepath.suffix != '.fit':
+                    with open(str(Path(backup_dir) / ".not_found"), mode="a") as not_found:
+                        not_found.write(str(self.get_export_filepath(backup_dir, fmt).name) + "\n")
             else:
                 filepath.write_text(response.text)
         else:
