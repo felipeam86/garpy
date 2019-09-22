@@ -48,19 +48,19 @@ def get_mocked_request(status_code=200, func_name=None, text=None):
 
 def get_activity(activity_id, fmt):
     if fmt == "original":
-        return get_mocked_response(
-            status_code=200,
-            content=(
+        if activity_id == 3454373317:
+            content = (
+                RESPONSE_EXAMPLES_PATH / "example_original_with_gpx.zip"
+            ).read_bytes()
+        else:
+            content = (
                 RESPONSE_EXAMPLES_PATH / "example_original_with_fit.zip"
-            ).read_bytes(),
-        )
+            ).read_bytes()
+        return get_mocked_response(status_code=200, content=content)
     else:
-        if (fmt == 'summary') and (activity_id == 9766544337):
+        if (fmt == "summary") and (activity_id == 9766544337):
             text = (RESPONSE_EXAMPLES_PATH / "summary_9766544337.json").read_text()
         else:
             text = f"Trust me, this is a {fmt!r} file for activity {activity_id!r}"
 
-        return get_mocked_response(
-            status_code=200,
-            text=text,
-        )
+        return get_mocked_response(status_code=200, text=text)

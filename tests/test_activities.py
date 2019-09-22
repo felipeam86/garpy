@@ -103,6 +103,25 @@ class TestActivity:
                 in (Path(tmp_path) / ".not_found").read_text()
             )
 
+    def test_download_manually_uploaded_gpx(self, client_activities, tmp_path):
+        with client_activities:
+            activities = Activities.list(client_activities)
+            activity = activities[1]
+            fmt = "original"
+            activity.download(client_activities, fmt, tmp_path)
+            # A GPX should have been downloaded
+            expected_downloaded_file_path = activity.get_export_filepath(tmp_path, 'gpx')
+            assert expected_downloaded_file_path.exists()
+
+            # The default FIT format for 'original' should not exist and be listed on .not_found
+            fit_file_path = activity.get_export_filepath(tmp_path, 'original')
+            assert not fit_file_path.exists()
+            assert (Path(tmp_path) / ".not_found").exists()
+            assert (
+                fit_file_path.name
+                in (Path(tmp_path) / ".not_found").read_text()
+            )
+
 
 class TestActivities:
     """activities.Activities"""
