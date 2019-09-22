@@ -15,7 +15,7 @@ from .settings import config
 
 @attr.s(frozen=True)
 class Activity:
-    """Garmin activity identifier
+    """Garmin activity
 
     Parameters
     ----------
@@ -27,8 +27,6 @@ class Activity:
         Type of activity, e.g, Cycling, Swimming, etc
     start
         Start date and time
-    summary
-        Dictionary with json summary downloaded from Garmin
 
     Examples
     --------
@@ -51,9 +49,7 @@ class Activity:
     def get_export_filepath(self, backup_dir: Path, fmt: str) -> Path:
         format_parameters = config["activities"].get(fmt)
         if not format_parameters:
-            raise ValueError(
-                f"Format '{fmt}' unknown."
-            )
+            raise ValueError(f"Format '{fmt}' unknown.")
         return Path(backup_dir) / (self.base_filename + format_parameters["suffix"])
 
     @classmethod
@@ -96,6 +92,15 @@ class Activity:
 
     @classmethod
     def from_garmin_connect(cls, activity_id: int, client: GarminClient):
+        """Constructor that fetches activity summary from Garmin Connect
+
+        Parameters
+        ----------
+        activity_id
+            Activity ID on Garmin Connect
+        client
+            Authenticated GarminClient
+        """
         response = client.get_activity(activity_id, "summary")
         activity_summary = json.loads(response.text)
         activity = Activity.from_garmin_summary(activity_summary)
@@ -108,7 +113,7 @@ class Activity:
         Parameters
         ----------
         client
-            Authentified GarminClient
+            Authenticated GarminClient
         fmt
             Format you wish to download
         backup_dir
@@ -128,9 +133,13 @@ class Activity:
                 filepath.write_bytes(fit_bytes)
 
                 # If original format is not FIT, register it as not found
-                if filepath.suffix != '.fit':
-                    with open(str(Path(backup_dir) / ".not_found"), mode="a") as not_found:
-                        not_found.write(str(self.get_export_filepath(backup_dir, fmt).name) + "\n")
+                if filepath.suffix != ".fit":
+                    with open(
+                        str(Path(backup_dir) / ".not_found"), mode="a"
+                    ) as not_found:
+                        not_found.write(
+                            str(self.get_export_filepath(backup_dir, fmt).name) + "\n"
+                        )
             else:
                 filepath.write_text(response.text)
         else:

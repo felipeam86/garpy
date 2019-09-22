@@ -14,7 +14,7 @@ import json
 import logging
 import re
 import sys
-from typing import Tuple
+from typing import Tuple, List, Dict
 
 import attr
 import requests
@@ -212,7 +212,9 @@ class GarminClient(object):
         )
         return response
 
-    def list_activities(self):
+    def list_activities(self) -> List[Dict]:
+        """List all historical activities on Garmin Connect.
+        """
         batch_size = 100
         activities = []
         for start_index in range(0, sys.maxsize, batch_size):

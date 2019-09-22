@@ -16,6 +16,15 @@ DEFAULT_FORMATS = tuple(config["activities"].keys())
 
 @attr.s
 class ActivitiesDownloader:
+    """Class for doing incremental backups of your Garmin activitiess
+
+    Parameters
+    ----------
+    client
+        Authenticated GarminClient
+    backup_dir
+        Where to download the file
+    """
 
     client: GarminClient = attr.ib()
     backup_dir: Path = attr.ib(default=config["backup-dir"])
@@ -30,10 +39,12 @@ class ActivitiesDownloader:
 
     @property
     def existing_files(self):
+        """Set of existing files on the backup directory"""
         return set(filepath for filepath in self.backup_dir.glob("*"))
 
     @property
     def not_found(self):
+        """Set of files not found on a previous backup try"""
         if (self.backup_dir / ".not_found").exists():
             return set(
                 self.backup_dir / path.strip()
@@ -46,6 +57,7 @@ class ActivitiesDownloader:
     def _discover_formats_to_download(
         self, formats: tuple = DEFAULT_FORMATS
     ) -> Dict[Activity, tuple]:
+        """Fetch list of activities and find which of them need backup and in what formats"""
         logger.info("Querying list of activities")
         activities = Activities.list(self.client)
         logger.info(f"{len(activities)} activities in total found on Garmin Connect")
@@ -65,7 +77,16 @@ class ActivitiesDownloader:
         return to_download
 
     def download(self, formats: tuple = DEFAULT_FORMATS):
-        logger.info(f"Downloading the following formats: {formats!r} to this folder: {self.backup_dir}")
+        """Do an incremental backup of the specified formats.
+
+        Parameters
+        ----------
+        formats
+            Formats you wish to download
+        """
+        logger.info(
+            f"Downloading the following formats: {formats!r} to this folder: {self.backup_dir}"
+        )
         to_download = self._discover_formats_to_download(formats)
         if not to_download:
             logger.info("Backup folder up to date. No activities will be downloaded")
