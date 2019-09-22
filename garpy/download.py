@@ -55,12 +55,9 @@ class ActivitiesDownloader:
             return set()
 
     def _discover_formats_to_download(
-        self, formats: tuple = DEFAULT_FORMATS
+        self, activities: Activities, formats: tuple = DEFAULT_FORMATS
     ) -> Dict[Activity, tuple]:
         """Fetch list of activities and find which of them need backup and in what formats"""
-        logger.info("Querying list of activities")
-        activities = Activities.list(self.client)
-        logger.info(f"{len(activities)} activities in total found on Garmin Connect")
 
         files_not_to_download = self.existing_files | self.not_found
         to_download = {}
@@ -76,18 +73,17 @@ class ActivitiesDownloader:
 
         return to_download
 
-    def download(self, formats: tuple = DEFAULT_FORMATS):
+    def download_all(self, activities: Activities, formats: tuple = DEFAULT_FORMATS):
         """Do an incremental backup of the specified formats.
 
         Parameters
         ----------
+        activities
+            List of activities fetched from Garmin Connect
         formats
             Formats you wish to download
         """
-        logger.info(
-            f"Downloading the following formats: {formats!r} to this folder: {self.backup_dir}"
-        )
-        to_download = self._discover_formats_to_download(formats)
+        to_download = self._discover_formats_to_download(activities, formats)
         if not to_download:
             logger.info("Backup folder up to date. No activities will be downloaded")
             return
@@ -107,6 +103,43 @@ class ActivitiesDownloader:
                 formats.desc = f"Downloading format {fmt!r}"
                 formats.display()
                 activity.download(self.client, fmt, self.backup_dir)
+
+    def download_one(self, activity: Activity, formats: tuple = DEFAULT_FORMATS):
+        """Download specified formats for a given activity
+
+        Parameters
+        ----------
+        activity
+            Activity you wish to download
+        formats
+            Formats you wish to download
+        """
+        logger.info(
+            f"Downloading activity {activity.id!r} "
+            f"from {activity.start.format('YYYY-MM-DD')}."
+        )
+        formats = progressbar(formats, leave=True)
+        for fmt in formats:
+            formats.desc = f"Downloading format {fmt!r}"
+            formats.display()
+            activity.download(self.client, fmt, self.backup_dir)
+
+    def __call__(self, formats: tuple = DEFAULT_FORMATS, activity_id: int = None):
+        logger.info(
+            f"Downloading the following formats: {formats!r} "
+            f"to this folder: {self.backup_dir}"
+        )
+        if activity_id is None:
+            logger.info("Querying list of activities")
+            activities = Activities.list(self.client)
+            logger.info(
+                f"{len(activities)} activities in total found on Garmin Connect"
+            )
+            self.download_all(activities=activities, formats=formats)
+        else:
+            logger.info(f"Fetching summary information for activity: {activity_id!r}")
+            activity = Activity.from_garmin_connect(activity_id, self.client)
+            self.download_one(activity=activity, formats=formats)
 
 
 def _isnotebook():  # pragma: no cover
