@@ -1,0 +1,18 @@
+dist: xenial
+
+language: python
+
+cache: pip
+
+python:
+  - "3.6"
+  - "3.7"
+
+before_install:
+- pip install poetry
+install:
+- poetry install
+script:
+- poetry run pytest --cov-report term-missing --cov=garpy tests/
+after_success:
+- coveralls

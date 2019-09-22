@@ -1,0 +1,82 @@
+[
+  {
+    "activityId": 2532452238,
+    "activityName": "Random walking",
+    "activityType": {
+      "typeKey": "walking"
+    },
+    "startTimeGMT": "2018-11-24 09:30:00"
+  },
+  {
+    "activityId": 3454373317,
+    "activityName": "Random strength_training",
+    "activityType": {
+      "typeKey": "strength_training"
+    },
+    "startTimeGMT": "2018-11-22 09:50:00"
+  },
+  {
+    "activityId": 5635475745,
+    "activityName": "Random indoor_cardio",
+    "activityType": {
+      "typeKey": "indoor_cardio"
+    },
+    "startTimeGMT": "2018-10-20 19:40:10"
+  },
+  {
+    "activityId": 2646435676,
+    "activityName": "Random walking",
+    "activityType": {
+      "typeKey": "walking"
+    },
+    "startTimeGMT": "2018-08-12 17:43:00"
+  },
+  {
+    "activityId": 7563564363,
+    "activityName": "Random walking",
+    "activityType": {
+      "typeKey": "walking"
+    },
+    "startTimeGMT": "2018-07-23 07:36:00"
+  },
+  {
+    "activityId": 8768456369,
+    "activityName": "Random running",
+    "activityType": {
+      "typeKey": "running"
+    },
+    "startTimeGMT": "2018-06-22 07:50:39"
+  },
+  {
+    "activityId": 8573636543,
+    "activityName": "Random indoor_cardio",
+    "activityType": {
+      "typeKey": "indoor_cardio"
+    },
+    "startTimeGMT": "2017-06-28 08:01:10"
+  },
+  {
+    "activityId": 4754684652,
+    "activityName": "Random running",
+    "activityType": {
+      "typeKey": "running"
+    },
+    "startTimeGMT": "2017-05-28 09:00:00"
+  },
+  {
+    "activityId": 8967453672,
+    "activityName": "Random strength_training",
+    "activityType": {
+      "typeKey": "strength_training"
+    },
+    "startTimeGMT": "2017-04-23 20:42:00"
+  },
+  {
+    "activityId": 9545734527,
+    "activityName": "Random rock_climbing",
+    "activityType": {
+      "typeKey": "rock_climbing"
+    },
+    "startTimeGMT": "2017-03-20 11:00:56"
+  }
+]

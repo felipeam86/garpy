@@ -1,0 +1,13 @@
+{
+    "activityId": 9766544337,
+    "activityName": "Morning ride",
+    "activityTypeDTO": {
+        "typeKey": "cycling"
+    },
+    "timeZoneUnitDTO": {
+        "unitKey": "Africa/Johannesburg"
+    },
+    "summaryDTO": {
+        "startTimeLocal": "2017-02-24T08:00:00.0"
+    }
+}
