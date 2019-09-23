@@ -19,7 +19,7 @@ click = "^7.0"
 tqdm = "^4.36"
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
+pytest = "^5.1"
 pytest-cov = "^2.7"
 coveralls = "^1.8"
 
