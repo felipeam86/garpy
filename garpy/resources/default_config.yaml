@@ -32,3 +32,7 @@ activities:
     tolerate:
       - 404
       - 204
+wellness:
+  endpoint: "https://connect.garmin.com/modern/proxy/download-service/files/wellness/{date}"
+  tolerate:
+    - 404

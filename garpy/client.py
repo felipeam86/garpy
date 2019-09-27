@@ -18,6 +18,7 @@ from typing import Tuple, List, Dict
 
 import attr
 import requests
+import pendulum
 
 from .settings import config, Password
 
@@ -229,3 +230,24 @@ class GarminClient(object):
             activities.extend(next_batch)
 
         return activities
+
+    def get_wellness(self, date: pendulum.DateTime) -> requests.Response:
+        """Get wellness data for a given date
+
+        Parameters
+        ----------
+        date
+            Date for which you want to fetch wellness data
+
+        Returns
+        -------
+        requests.Response
+            Response content of the request to Garmin Connect
+        """
+
+        response = self.get(
+            url=config["wellness"]["endpoint"].format(date=date.format('YYYY-MM-DD')),
+            err_message=f"Failed to fetch wellness data for date {date!r}.",
+            tolerate=tuple(config["wellness"]["tolerate"]),
+        )
+        return response
