@@ -4,7 +4,7 @@
 from pathlib import Path
 from unittest.mock import Mock
 
-from common import client, activity, client_activities, get_mocked_response, get_activity
+from conftest import get_mocked_response, get_activity
 
 from garpy import ActivitiesDownloader, Activity, Activities
 from garpy.download import DEFAULT_FORMATS

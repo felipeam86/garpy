@@ -12,8 +12,7 @@ from unittest.mock import Mock
 from garpy.client import extract_auth_ticket_url
 from garpy import GarminClient
 from garpy.settings import config, Password
-from common import (
-    client,
+from conftest import (
     get_mocked_request,
     get_mocked_response
 )
