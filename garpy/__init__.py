@@ -6,6 +6,7 @@ import sys
 from .activity import Activity, Activities
 from .client import GarminClient
 from .download import ActivitiesDownloader
+from .wellness import Wellness
 
 # Create logger
 logger = logging.getLogger(__name__)

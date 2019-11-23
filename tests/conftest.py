@@ -34,6 +34,19 @@ def client_activities(client):
     return client
 
 
+@pytest.fixture
+def client_wellness(client):
+    client.get_wellness = Mock(
+        return_value=get_mocked_response(
+            status_code=200,
+            content=(
+                RESPONSE_EXAMPLES_PATH / "example_original_with_fit.zip"
+            ).read_bytes(),
+        )
+    )
+    return client
+
+
 def get_mocked_response(status_code, text=None, content=None):
     failed_response = Mock()
     failed_response.status_code = status_code
