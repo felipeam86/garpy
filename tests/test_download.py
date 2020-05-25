@@ -4,7 +4,7 @@
 from pathlib import Path
 from unittest.mock import Mock
 
-from common import client, activity, client_activities, get_mocked_response, get_activity
+from conftest import get_mocked_response, get_activity
 
 from garpy import ActivitiesDownloader, Activity, Activities
 from garpy.download import DEFAULT_FORMATS
@@ -143,8 +143,9 @@ class TestActivitiesDownloader:
         with client_activities:
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
-            downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == 50
+            activities = Activities.list(client_activities)
+            downloader.download_all(activities)
+            assert len(list(tmp_path.glob('*'))) == len(activities) * len(DEFAULT_FORMATS)
 
     def test_download_with_backup_up_to_date(self, client_activities, tmp_path):
         activities = client_activities.list_activities()
@@ -156,10 +157,10 @@ class TestActivitiesDownloader:
                 for fmt in DEFAULT_FORMATS:
                     activity.download(client_activities, fmt, tmp_path)
 
-            assert len(list(tmp_path.glob('*'))) == 50
+            assert len(list(tmp_path.glob('*'))) == len(activities) * len(DEFAULT_FORMATS)
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == 50
+            assert len(list(tmp_path.glob('*'))) == len(activities) * len(DEFAULT_FORMATS)
 
     def test_download_with_backup_up_to_date_and_files_not_found(self, client_activities, tmp_path):
         activities = client_activities.list_activities()
@@ -175,10 +176,10 @@ class TestActivitiesDownloader:
                     else:
                         activity.download(client_activities, fmt, tmp_path)
 
-            assert len(list(tmp_path.glob('*'))) == 41
+            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == 41
+            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
 
     def test_download_with_files_not_found(self, client_activities, tmp_path):
         activities = client_activities.list_activities()
@@ -195,7 +196,7 @@ class TestActivitiesDownloader:
             assert len(list(tmp_path.glob('*'))) == 1, "There should be a '.not_found' file in the backup directory"
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == 41
+            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
 
     def test_download_with_files_not_found_and_some_backed_up(self, client_activities, tmp_path):
         activities = client_activities.list_activities()
@@ -211,10 +212,10 @@ class TestActivitiesDownloader:
                     else:
                         activity.download(client_activities, fmt, tmp_path)
 
-            assert len(list(tmp_path.glob('*'))) == 21
+            assert len(list(tmp_path.glob('*'))) == 5 * (len(DEFAULT_FORMATS) - 1) + 1
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == 46
+            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 5 + 1
 
     def test_download_one_activity_with_backup_from_scratch(self, client_activities, tmp_path):
         assert len(list(tmp_path.glob('*'))) == 0
@@ -224,7 +225,7 @@ class TestActivitiesDownloader:
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_one(activity)
-            assert len(list(tmp_path.glob('*'))) == 5
+            assert len(list(tmp_path.glob('*'))) == len(DEFAULT_FORMATS)
 
     def test_call_for_all_activities(self, client_activities, tmp_path):
         assert len(list(tmp_path.glob('*'))) == 0
@@ -232,7 +233,7 @@ class TestActivitiesDownloader:
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader()
-            assert len(list(tmp_path.glob('*'))) == 50
+            assert len(list(tmp_path.glob('*'))) == len(client_activities.list_activities()) * len(DEFAULT_FORMATS)
 
     def test_call_for_one_activity(self, client_activities, tmp_path):
         assert len(list(tmp_path.glob('*'))) == 0
@@ -240,4 +241,4 @@ class TestActivitiesDownloader:
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader(activity_id=9766544337)
-            assert len(list(tmp_path.glob('*'))) == 5
+            assert len(list(tmp_path.glob('*'))) == len(DEFAULT_FORMATS)

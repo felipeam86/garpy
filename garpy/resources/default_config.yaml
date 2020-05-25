@@ -26,3 +26,13 @@ activities:
     tolerate:
       - 404
       - 500
+  mkl:
+    endpoint: "https://connect.garmin.com/modern/proxy/download-service/export/kml/activity/{id}"
+    suffix: ".mkl"
+    tolerate:
+      - 404
+      - 204
+wellness:
+  endpoint: "https://connect.garmin.com/modern/proxy/download-service/files/wellness/{date}"
+  tolerate:
+    - 404

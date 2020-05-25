@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from common import client, client_activities, activity, get_mocked_request, get_mocked_response, get_activity
+from conftest import get_mocked_request, get_mocked_response, get_activity
 
 from garpy import Activity, Activities
 

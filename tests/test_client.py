@@ -4,6 +4,7 @@
 import json
 from pathlib import Path
 
+import pendulum
 import pytest
 import requests
 from unittest.mock import Mock
@@ -11,8 +12,7 @@ from unittest.mock import Mock
 from garpy.client import extract_auth_ticket_url
 from garpy import GarminClient
 from garpy.settings import config, Password
-from common import (
-    client,
+from conftest import (
     get_mocked_request,
     get_mocked_response
 )
@@ -299,3 +299,43 @@ class TestGarminClient:
             assert client.session.get.call_count == 2
 
         assert activities == json.loads(first_batch)
+
+    def test_get_wellness(self, client):
+        endpoint = config["wellness"]["endpoint"]
+        date = pendulum.DateTime(2019, 9, 27)
+        with client:
+            # Test normal behavior with 200 response code
+            client.session.get = get_mocked_request(
+                status_code=200, func_name="client.session.get()"
+            )
+            client.get_wellness(date)
+            client.session.get.assert_called_once()
+            client.session.get.assert_called_with(
+                endpoint.format(date='2019-09-27'), params=None
+            )
+
+            # Test raised exception with 400 response code
+            client.session.get = get_mocked_request(
+                status_code=400, func_name="client.session.get()"
+            )
+            with pytest.raises(ConnectionError) as excinfo:
+                client.get_wellness(date)
+            assert f"Response code: 400" in str(excinfo.value)
+
+            client.session.get.assert_called_once()
+            client.session.get.assert_called_with(
+                endpoint.format(date='2019-09-27'), params=None
+            )
+
+            # Test error codes get tolerated
+            tolerate = tuple(config["wellness"].get("tolerate"))
+            if tolerate is not None:
+                for code in tuple(config["wellness"]["tolerate"]):
+                    client.session.get = get_mocked_request(
+                        status_code=code, func_name="client.session.get()"
+                    )
+                    client.get_wellness(date)
+                    client.session.get.assert_called_once()
+                    client.session.get.assert_called_with(
+                        endpoint.format(date='2019-09-27'), params=None
+                    )

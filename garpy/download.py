@@ -94,7 +94,7 @@ class ActivitiesDownloader:
         to_download = progressbar(to_download.items())
         for i, (activity, formats) in enumerate(to_download):
             to_download.desc = (
-                f"Downloading activity {activity.id!r} "
+                f"Downloading {activity.type!r} activity {activity.id!r} "
                 f"from {activity.start.format('YYYY-MM-DD')}. Formats: {formats!r}"
             )
             to_download.display()
@@ -115,7 +115,7 @@ class ActivitiesDownloader:
             Formats you wish to download
         """
         logger.info(
-            f"Downloading activity {activity.id!r} "
+            f"Downloading {activity.type!r} activity {activity.id!r} "
             f"from {activity.start.format('YYYY-MM-DD')}."
         )
         formats = progressbar(formats, leave=True)
