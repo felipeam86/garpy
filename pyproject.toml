@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "garpy"
-version = "0.3.1"
+version = "0.3.2"
 description = "Python client for downloading activities from Garmin Connect"
 authors = ["Felipe Aguirre Martinez <felipeam86@gmail.com>"]
 license = "MIT"
@@ -20,7 +20,7 @@ click = "^7.0"
 tqdm = "^4.36"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.1"
+pytest = "^6.0"
 pytest-cov = "^2.7"
 coveralls = "^2.0"
 

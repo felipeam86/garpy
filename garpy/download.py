@@ -6,7 +6,7 @@ from typing import Dict
 
 import attr
 
-from . import GarminClient, Activities, Activity
+from . import Activities, Activity, GarminClient
 from .settings import config
 
 logger = logging.getLogger(__name__)

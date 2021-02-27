@@ -4,9 +4,9 @@
 from pathlib import Path
 from unittest.mock import Mock
 
-from conftest import get_mocked_response, get_activity
+from conftest import get_activity, get_mocked_response
 
-from garpy import ActivitiesDownloader, Activity, Activities
+from garpy import Activities, ActivitiesDownloader, Activity
 from garpy.download import DEFAULT_FORMATS
 
 RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
@@ -75,18 +75,24 @@ class TestActivitiesDownloader:
         downloader = ActivitiesDownloader(client, tmp_path)
         assert downloader.not_found == {activity.get_export_filepath(tmp_path, fmt)}
 
-    def test_discover_formats_to_download_with_backup_from_scratch(self, client_activities, tmp_path):
+    def test_discover_formats_to_download_with_backup_from_scratch(
+        self, client_activities, tmp_path
+    ):
         activities = client_activities.list_activities()
         assert len(activities) == 10
         with client_activities:
             downloader = ActivitiesDownloader(client_activities, tmp_path)
-            to_download = downloader._discover_formats_to_download(Activities.list(client_activities))
+            to_download = downloader._discover_formats_to_download(
+                Activities.list(client_activities)
+            )
 
         assert len(to_download) == 10
         for activity, formats in to_download.items():
             assert set(formats) == set(DEFAULT_FORMATS)
 
-    def test_discover_formats_to_download_with_incremental_backup(self, client_activities, tmp_path):
+    def test_discover_formats_to_download_with_incremental_backup(
+        self, client_activities, tmp_path
+    ):
         activities = client_activities.list_activities()
         assert len(activities) == 10
         with client_activities:
@@ -94,13 +100,17 @@ class TestActivitiesDownloader:
             for fmt in DEFAULT_FORMATS:
                 activity.download(client_activities, fmt, tmp_path)
             downloader = ActivitiesDownloader(client_activities, tmp_path)
-            to_download = downloader._discover_formats_to_download(Activities.list(client_activities))
+            to_download = downloader._discover_formats_to_download(
+                Activities.list(client_activities)
+            )
 
         assert len(to_download) == 9
         for activity, formats in to_download.items():
             assert set(formats) == set(DEFAULT_FORMATS)
 
-    def test_discover_formats_to_download_with_not_found(self, client_activities, tmp_path):
+    def test_discover_formats_to_download_with_not_found(
+        self, client_activities, tmp_path
+    ):
         activities = client_activities.list_activities()
         assert len(activities) == 10
         with client_activities:
@@ -112,7 +122,9 @@ class TestActivitiesDownloader:
 
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
-            to_download = downloader._discover_formats_to_download(Activities.list(client_activities))
+            to_download = downloader._discover_formats_to_download(
+                Activities.list(client_activities)
+            )
 
         assert len(to_download) == 10
         for activity, formats in to_download.items():
@@ -122,7 +134,9 @@ class TestActivitiesDownloader:
             else:
                 assert set(formats) == set(DEFAULT_FORMATS)
 
-    def test_discover_formats_to_download_with_backup_up_to_date(self, client_activities, tmp_path):
+    def test_discover_formats_to_download_with_backup_up_to_date(
+        self, client_activities, tmp_path
+    ):
         activities = client_activities.list_activities()
         assert len(activities) == 10
         with client_activities:
@@ -134,22 +148,26 @@ class TestActivitiesDownloader:
 
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
-            to_download = downloader._discover_formats_to_download(Activities.list(client_activities))
+            to_download = downloader._discover_formats_to_download(
+                Activities.list(client_activities)
+            )
 
         assert len(to_download) == 0
 
     def test_download_with_backup_from_scratch(self, client_activities, tmp_path):
-        assert len(list(tmp_path.glob('*'))) == 0
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             activities = Activities.list(client_activities)
             downloader.download_all(activities)
-            assert len(list(tmp_path.glob('*'))) == len(activities) * len(DEFAULT_FORMATS)
+            assert len(list(tmp_path.glob("*"))) == len(activities) * len(
+                DEFAULT_FORMATS
+            )
 
     def test_download_with_backup_up_to_date(self, client_activities, tmp_path):
         activities = client_activities.list_activities()
-        assert len(list(tmp_path.glob('*'))) == 0
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             # Download everything manually first
             for activity_entry in activities:
@@ -157,88 +175,129 @@ class TestActivitiesDownloader:
                 for fmt in DEFAULT_FORMATS:
                     activity.download(client_activities, fmt, tmp_path)
 
-            assert len(list(tmp_path.glob('*'))) == len(activities) * len(DEFAULT_FORMATS)
+            assert len(list(tmp_path.glob("*"))) == len(activities) * len(
+                DEFAULT_FORMATS
+            )
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == len(activities) * len(DEFAULT_FORMATS)
+            assert len(list(tmp_path.glob("*"))) == len(activities) * len(
+                DEFAULT_FORMATS
+            )
 
-    def test_download_with_backup_up_to_date_and_files_not_found(self, client_activities, tmp_path):
+    def test_download_with_backup_up_to_date_and_files_not_found(
+        self, client_activities, tmp_path
+    ):
         activities = client_activities.list_activities()
-        assert len(list(tmp_path.glob('*'))) == 0
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             # Download everything manually first and fake that GPX was not found for all activities
             for activity_entry in activities:
                 activity = Activity.from_garmin_activity_list_entry(activity_entry)
                 for fmt in DEFAULT_FORMATS:
-                    if fmt == 'gpx':
-                        with open(str(Path(tmp_path) / ".not_found"), mode="a") as not_found:
-                            not_found.write(str(activity.get_export_filepath(tmp_path, fmt).name) + "\n")
+                    if fmt == "gpx":
+                        with open(
+                            str(Path(tmp_path) / ".not_found"), mode="a"
+                        ) as not_found:
+                            not_found.write(
+                                str(activity.get_export_filepath(tmp_path, fmt).name)
+                                + "\n"
+                            )
                     else:
                         activity.download(client_activities, fmt, tmp_path)
 
-            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
+            assert (
+                len(list(tmp_path.glob("*")))
+                == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
+            )
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
+            assert (
+                len(list(tmp_path.glob("*")))
+                == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
+            )
 
     def test_download_with_files_not_found(self, client_activities, tmp_path):
         activities = client_activities.list_activities()
-        assert len(list(tmp_path.glob('*'))) == 0
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             # Fake that GPX was not found for all activities
             for activity_entry in activities:
                 activity = Activity.from_garmin_activity_list_entry(activity_entry)
                 for fmt in DEFAULT_FORMATS:
-                    if fmt == 'gpx':
-                        with open(str(Path(tmp_path) / ".not_found"), mode="a") as not_found:
-                            not_found.write(str(activity.get_export_filepath(tmp_path, fmt).name) + "\n")
+                    if fmt == "gpx":
+                        with open(
+                            str(Path(tmp_path) / ".not_found"), mode="a"
+                        ) as not_found:
+                            not_found.write(
+                                str(activity.get_export_filepath(tmp_path, fmt).name)
+                                + "\n"
+                            )
 
-            assert len(list(tmp_path.glob('*'))) == 1, "There should be a '.not_found' file in the backup directory"
+            assert (
+                len(list(tmp_path.glob("*"))) == 1
+            ), "There should be a '.not_found' file in the backup directory"
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
+            assert (
+                len(list(tmp_path.glob("*")))
+                == len(activities) * (len(DEFAULT_FORMATS) - 1) + 1
+            )
 
-    def test_download_with_files_not_found_and_some_backed_up(self, client_activities, tmp_path):
+    def test_download_with_files_not_found_and_some_backed_up(
+        self, client_activities, tmp_path
+    ):
         activities = client_activities.list_activities()
-        assert len(list(tmp_path.glob('*'))) == 0
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             # Fake that GPX was not found for all activities
             for activity_entry in activities[:5]:
                 activity = Activity.from_garmin_activity_list_entry(activity_entry)
                 for fmt in DEFAULT_FORMATS:
-                    if fmt == 'gpx':
-                        with open(str(Path(tmp_path) / ".not_found"), mode="a") as not_found:
-                            not_found.write(str(activity.get_export_filepath(tmp_path, fmt).name) + "\n")
+                    if fmt == "gpx":
+                        with open(
+                            str(Path(tmp_path) / ".not_found"), mode="a"
+                        ) as not_found:
+                            not_found.write(
+                                str(activity.get_export_filepath(tmp_path, fmt).name)
+                                + "\n"
+                            )
                     else:
                         activity.download(client_activities, fmt, tmp_path)
 
-            assert len(list(tmp_path.glob('*'))) == 5 * (len(DEFAULT_FORMATS) - 1) + 1
+            assert len(list(tmp_path.glob("*"))) == 5 * (len(DEFAULT_FORMATS) - 1) + 1
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_all(Activities.list(client_activities))
-            assert len(list(tmp_path.glob('*'))) == len(activities) * (len(DEFAULT_FORMATS) - 1) + 5 + 1
+            assert (
+                len(list(tmp_path.glob("*")))
+                == len(activities) * (len(DEFAULT_FORMATS) - 1) + 5 + 1
+            )
 
-    def test_download_one_activity_with_backup_from_scratch(self, client_activities, tmp_path):
-        assert len(list(tmp_path.glob('*'))) == 0
+    def test_download_one_activity_with_backup_from_scratch(
+        self, client_activities, tmp_path
+    ):
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             activity = Activity.from_garmin_connect(9766544337, client_activities)
 
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader.download_one(activity)
-            assert len(list(tmp_path.glob('*'))) == len(DEFAULT_FORMATS)
+            assert len(list(tmp_path.glob("*"))) == len(DEFAULT_FORMATS)
 
     def test_call_for_all_activities(self, client_activities, tmp_path):
-        assert len(list(tmp_path.glob('*'))) == 0
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader()
-            assert len(list(tmp_path.glob('*'))) == len(client_activities.list_activities()) * len(DEFAULT_FORMATS)
+            assert len(list(tmp_path.glob("*"))) == len(
+                client_activities.list_activities()
+            ) * len(DEFAULT_FORMATS)
 
     def test_call_for_one_activity(self, client_activities, tmp_path):
-        assert len(list(tmp_path.glob('*'))) == 0
+        assert len(list(tmp_path.glob("*"))) == 0
         with client_activities:
             # Discover what should be downloaded
             downloader = ActivitiesDownloader(client_activities, tmp_path)
             downloader(activity_id=9766544337)
-            assert len(list(tmp_path.glob('*'))) == len(DEFAULT_FORMATS)
+            assert len(list(tmp_path.glob("*"))) == len(DEFAULT_FORMATS)

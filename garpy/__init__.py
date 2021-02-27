@@ -1,9 +1,9 @@
-__version__ = "0.2.0"
+__version__ = "0.3.2"
 
 import logging
 import sys
 
-from .activity import Activity, Activities
+from .activity import Activities, Activity
 from .client import GarminClient
 from .download import ActivitiesDownloader
 from .wellness import Wellness
