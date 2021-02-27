@@ -24,13 +24,15 @@ class Wellness:
 
     @date.validator
     def wont_travel_to_future(self, attribute, value):
-        if value.in_tz('local') > pendulum.DateTime.today().in_tz('local') :
-            raise ValueError(f"garpy cannot download data from the future... "
-                             f"try a date before today {value.format('YYYY-MM-DD')}")
+        if value.in_tz("local") > pendulum.DateTime.today().in_tz("local"):
+            raise ValueError(
+                f"garpy cannot download data from the future... "
+                f"try a date before today {value.format('YYYY-MM-DD')}"
+            )
 
     @property
     def base_filename(self) -> str:
-        return self.date.format('YYYY-MM-DD') + '.zip'
+        return self.date.format("YYYY-MM-DD") + ".zip"
 
     def get_export_filepath(self, backup_dir: Path) -> Path:
         return Path(backup_dir) / self.base_filename

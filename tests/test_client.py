@@ -48,9 +48,7 @@ class TestGarminClient:
         assert not client.connected, "Client should not be connected"
         client.connect()
         client._authenticate.assert_called_once()
-        assert (
-            client.connected
-        ), "Client should be connected after authentication"
+        assert client.connected, "Client should be connected after authentication"
         client.disconnect()
         assert not client.connected, "Client should be disconnected after disconnecting"
 
@@ -61,24 +59,30 @@ class TestGarminClient:
         with pytest.raises(ConnectionError) as excinfo:
             client.connect()
 
-        err_msg = f"Missing credentials. Your forgot to provide username or password. " \
-                  f"username: ''. password: '*************'"
+        err_msg = (
+            f"Missing credentials. Your forgot to provide username or password. "
+            f"username: ''. password: '*************'"
+        )
         assert err_msg in str(excinfo.value)
 
         client = GarminClient(username="falseuser", password="")
         with pytest.raises(ConnectionError) as excinfo:
             client.connect()
 
-        err_msg = f"Missing credentials. Your forgot to provide username or password. " \
-                  f"username: 'falseuser'. password: ''"
+        err_msg = (
+            f"Missing credentials. Your forgot to provide username or password. "
+            f"username: 'falseuser'. password: ''"
+        )
         assert err_msg in str(excinfo.value)
 
         client = GarminClient(username="", password="")
         with pytest.raises(ConnectionError) as excinfo:
             client.connect()
 
-        err_msg = f"Missing credentials. Your forgot to provide username or password. " \
-                  f"username: ''. password: ''"
+        err_msg = (
+            f"Missing credentials. Your forgot to provide username or password. "
+            f"username: ''. password: ''"
+        )
         assert err_msg in str(excinfo.value)
 
     def test_authentication_fail_raises_error(self):
@@ -101,7 +105,9 @@ class TestGarminClient:
                 client.connected
             ), "The client should be connected within the with statement"
 
-        assert not client.connected, "Client should have disconnected after with statement"
+        assert (
+            not client.connected
+        ), "Client should have disconnected after with statement"
 
     def test_authenticate_with_string_password(self):
         """Test normal behavior of _authenticate"""
@@ -136,7 +142,7 @@ class TestGarminClient:
             headers={"origin": "https://sso.garmin.com"},
             params={"service": "https://connect.garmin.com/modern"},
             data={
-                "username": 'falseuser',
+                "username": "falseuser",
                 "password": "falsepassword",
                 "embed": "false",
             },
@@ -282,14 +288,14 @@ class TestGarminClient:
             )
 
     def test_list_activities(self, client):
-        first_batch = (RESPONSE_EXAMPLES_PATH  / "list_activities.json").read_text()
+        first_batch = (RESPONSE_EXAMPLES_PATH / "list_activities.json").read_text()
         with client:
             client.session.get = Mock(
                 side_effect=[
                     get_mocked_response(200, first_batch),
-                    get_mocked_response(200, '[]')
+                    get_mocked_response(200, "[]"),
                 ],
-                func_name="client.session.get()"
+                func_name="client.session.get()",
             )
             activities = client.list_activities()
 
@@ -308,7 +314,7 @@ class TestGarminClient:
             client.get_wellness(date)
             client.session.get.assert_called_once()
             client.session.get.assert_called_with(
-                endpoint.format(date='2019-09-27'), params=None
+                endpoint.format(date="2019-09-27"), params=None
             )
 
             # Test raised exception with 400 response code
@@ -321,7 +327,7 @@ class TestGarminClient:
 
             client.session.get.assert_called_once()
             client.session.get.assert_called_with(
-                endpoint.format(date='2019-09-27'), params=None
+                endpoint.format(date="2019-09-27"), params=None
             )
 
             # Test error codes get tolerated
@@ -334,5 +340,5 @@ class TestGarminClient:
                     client.get_wellness(date)
                     client.session.get.assert_called_once()
                     client.session.get.assert_called_with(
-                        endpoint.format(date='2019-09-27'), params=None
+                        endpoint.format(date="2019-09-27"), params=None
                     )

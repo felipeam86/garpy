@@ -27,7 +27,20 @@ class TestCLI:
             with patch.object(cli.ActivitiesDownloader, "__call__", return_value=None):
                 runner = CliRunner()
                 with runner.isolated_filesystem():
-                    result = runner.invoke(cli.main, ["download", "-u", "dummy", "-p", "password", "-f", "gpx", "-f", "fit"])
+                    result = runner.invoke(
+                        cli.main,
+                        [
+                            "download",
+                            "-u",
+                            "dummy",
+                            "-p",
+                            "password",
+                            "-f",
+                            "gpx",
+                            "-f",
+                            "fit",
+                        ],
+                    )
                     assert result.exit_code == 0
 
     def test_download_fails_with_existing_file_as_bakcup_dir(self, tmp_path):
@@ -37,7 +50,10 @@ class TestCLI:
                 with runner.isolated_filesystem():
                     backup_dir = Path(tmp_path) / "text_file"
                     backup_dir.touch()
-                    result = runner.invoke(cli.main, ["download", "-u", "dummy", "-p", "password", str(backup_dir)])
+                    result = runner.invoke(
+                        cli.main,
+                        ["download", "-u", "dummy", "-p", "password", str(backup_dir)],
+                    )
                     assert result.exit_code == 1
                     assert (
                         str(result.exception)

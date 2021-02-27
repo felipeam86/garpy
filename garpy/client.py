@@ -214,8 +214,7 @@ class GarminClient(object):
         return response
 
     def list_activities(self) -> List[Dict]:
-        """List all historical activities on Garmin Connect.
-        """
+        """List all historical activities on Garmin Connect."""
         batch_size = 100
         activities = []
         for start_index in range(0, sys.maxsize, batch_size):
@@ -246,7 +245,7 @@ class GarminClient(object):
         """
 
         response = self.get(
-            url=config["wellness"]["endpoint"].format(date=date.format('YYYY-MM-DD')),
+            url=config["wellness"]["endpoint"].format(date=date.format("YYYY-MM-DD")),
             err_message=f"Failed to fetch wellness data for date {date!r}.",
             tolerate=tuple(config["wellness"]["tolerate"]),
         )

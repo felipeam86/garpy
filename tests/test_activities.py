@@ -84,7 +84,9 @@ class TestActivity:
             expected_downloaded_file_path = activity.get_export_filepath(tmp_path, fmt)
             assert expected_downloaded_file_path.exists()
             assert not (Path(tmp_path) / ".not_found").exists()
-            zipped_file = zipfile.ZipFile(RESPONSE_EXAMPLES_PATH / "example_original_with_fit.zip", mode="r")
+            zipped_file = zipfile.ZipFile(
+                RESPONSE_EXAMPLES_PATH / "example_original_with_fit.zip", mode="r"
+            )
             fit_inside_original_zip = zipped_file.open(zipped_file.namelist()[0]).read()
             assert expected_downloaded_file_path.read_bytes() == fit_inside_original_zip
 
@@ -110,17 +112,16 @@ class TestActivity:
             fmt = "original"
             activity.download(client_activities, fmt, tmp_path)
             # A GPX should have been downloaded
-            expected_downloaded_file_path = activity.get_export_filepath(tmp_path, 'gpx')
+            expected_downloaded_file_path = activity.get_export_filepath(
+                tmp_path, "gpx"
+            )
             assert expected_downloaded_file_path.exists()
 
             # The default FIT format for 'original' should not exist and be listed on .not_found
-            fit_file_path = activity.get_export_filepath(tmp_path, 'original')
+            fit_file_path = activity.get_export_filepath(tmp_path, "original")
             assert not fit_file_path.exists()
             assert (Path(tmp_path) / ".not_found").exists()
-            assert (
-                fit_file_path.name
-                in (Path(tmp_path) / ".not_found").read_text()
-            )
+            assert fit_file_path.name in (Path(tmp_path) / ".not_found").read_text()
 
 
 class TestActivities:
