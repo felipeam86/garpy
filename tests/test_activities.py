@@ -7,9 +7,9 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from conftest import get_mocked_request, get_mocked_response, get_activity
+from conftest import get_activity, get_mocked_request, get_mocked_response
 
-from garpy import Activity, Activities
+from garpy import Activities, Activity
 
 RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 

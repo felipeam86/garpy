@@ -14,13 +14,13 @@ import json
 import logging
 import re
 import sys
-from typing import Tuple, List, Dict
+from typing import Dict, List, Tuple
 
 import attr
-import requests
 import pendulum
+import requests
 
-from .settings import config, Password
+from .settings import Password, config
 
 logger = logging.getLogger(__name__)
 ENDPOINTS = config["endpoints"]

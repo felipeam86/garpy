@@ -3,19 +3,16 @@
 
 import json
 from pathlib import Path
+from unittest.mock import Mock
 
 import pendulum
 import pytest
 import requests
-from unittest.mock import Mock
+from conftest import get_mocked_request, get_mocked_response
 
-from garpy.client import extract_auth_ticket_url
 from garpy import GarminClient
-from garpy.settings import config, Password
-from conftest import (
-    get_mocked_request,
-    get_mocked_response
-)
+from garpy.client import extract_auth_ticket_url
+from garpy.settings import Password, config
 
 RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 

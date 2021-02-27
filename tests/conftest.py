@@ -1,9 +1,10 @@
 import json
-import pytest
 from pathlib import Path
 from unittest.mock import Mock
 
-from garpy import GarminClient, Activity
+import pytest
+
+from garpy import Activity, GarminClient
 
 RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 
