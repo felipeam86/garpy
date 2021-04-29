@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import json
+import os
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -44,7 +45,10 @@ class Activity:
 
     @property
     def base_filename(self):
-        return f"{self.start.in_tz('UTC').isoformat()}_{self.id}"
+        filename = f"{self.start.in_tz('UTC').isoformat()}_{self.id}"
+        if os.name == "nt": # Windows complains about : in filenames.
+            filename = filename.replace(':', '.')
+        return filename
 
     def get_export_filepath(self, backup_dir: Path, fmt: str) -> Path:
         format_parameters = config["activities"].get(fmt)
