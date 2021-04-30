@@ -46,8 +46,8 @@ class Activity:
     @property
     def base_filename(self):
         filename = f"{self.start.in_tz('UTC').isoformat()}_{self.id}"
-        if os.name == "nt": # Windows complains about : in filenames.
-            filename = filename.replace(':', '.')
+        if os.name == "nt":  # Windows complains about : in filenames.
+            filename = filename.replace(":", ".")
         return filename
 
     def get_export_filepath(self, backup_dir: Path, fmt: str) -> Path:

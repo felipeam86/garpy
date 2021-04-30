@@ -54,7 +54,7 @@ class TestActivity:
     def test_filepath_awareness(self, activity, tmp_path):
         expected_base_filename = "2018-11-24T09:30:00+00:00_2532452238"
         if os.name == "nt":
-            expected_base_filename = expected_base_filename.replace(':', '.')
+            expected_base_filename = expected_base_filename.replace(":", ".")
         assert activity.base_filename == expected_base_filename
         assert activity.get_export_filepath(tmp_path, "gpx") == tmp_path / (
             expected_base_filename + ".gpx"
