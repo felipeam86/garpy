@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
 import zipfile
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from conftest import get_activity, get_mocked_request, get_mocked_response
@@ -52,6 +53,8 @@ class TestActivity:
 
     def test_filepath_awareness(self, activity, tmp_path):
         expected_base_filename = "2018-11-24T09:30:00+00:00_2532452238"
+        if os.name == "nt":
+            expected_base_filename = expected_base_filename.replace(":", ".")
         assert activity.base_filename == expected_base_filename
         assert activity.get_export_filepath(tmp_path, "gpx") == tmp_path / (
             expected_base_filename + ".gpx"
@@ -60,6 +63,13 @@ class TestActivity:
         with pytest.raises(ValueError) as excinfo:
             activity.get_export_filepath(tmp_path, "unknown_format")
         assert f"Format 'unknown_format' unknown." in str(excinfo.value)
+
+    def test_filename_windows(self, activity):
+        with patch("os.name", "nt"):
+            expected_base_filename = "2018-11-24T09:30:00+00:00_2532452238".replace(
+                ":", "."
+            )
+            assert activity.base_filename == expected_base_filename
 
     def test_download_gpx(self, activity, client_activities, tmp_path):
         with client_activities:
