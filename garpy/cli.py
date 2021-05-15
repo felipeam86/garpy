@@ -52,7 +52,15 @@ def main():
     " Otherwise, do incremental update of backup",
     hide_input=True,
 )
-def download(backup_dir, formats, username, password, activity_id):
+@click.option(
+    "--user-agent",
+    "user_agent",
+    default=config["user-agent"],
+    metavar="{user_agent}",
+    help="User agent to be used by requests",
+    hide_input=True,
+)
+def download(backup_dir, formats, username, password, activity_id, user_agent):
     """Download activities from Garmin Connect
 
     Entry point for downloading activities from Garmin Connect. By default, it downloads all
@@ -76,6 +84,8 @@ def download(backup_dir, formats, username, password, activity_id):
     if backup_dir.is_file():
         raise Exception("The provided backup directory exists and is a file")
 
-    with GarminClient(username=username, password=password) as client:
+    with GarminClient(
+        username=username, password=password, user_agent=user_agent
+    ) as client:
         downloader = ActivitiesDownloader(client=client, backup_dir=backup_dir)
         downloader(formats=formats, activity_id=activity_id)
