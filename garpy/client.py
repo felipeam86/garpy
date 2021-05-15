@@ -88,6 +88,7 @@ class GarminClient(object):
     username: str = attr.ib(default=config.get("username"))
     password: Password = attr.ib(default=config.get("password"), repr=False)
     session: requests.Session = attr.ib(default=None, repr=False)
+    user_agent: str = attr.ib(default=config["user-agent"])
 
     @password.validator
     def enforce_password(self, attribute, value):
@@ -120,7 +121,10 @@ class GarminClient(object):
         logger.info(f"Authenticating {self!r}")
         auth_response = self.session.post(
             ENDPOINTS["SSO_LOGIN_URL"],
-            headers={"origin": "https://sso.garmin.com"},
+            headers={
+                "origin": "https://sso.garmin.com",
+                "User-Agent": self.user_agent,
+            },
             params={"service": "https://connect.garmin.com/modern"},
             data={
                 "username": self.username,
