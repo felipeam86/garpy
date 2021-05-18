@@ -19,6 +19,7 @@ from typing import Dict, List, Tuple
 import attr
 import pendulum
 import requests
+import cloudscraper
 
 from .settings import Password, config
 
@@ -109,7 +110,7 @@ class GarminClient(object):
                 "Missing credentials. Your forgot to provide username or password. "
                 f"username: '{self.username}'. password: '{self.password}'"
             )
-        self.session = self.session or requests.Session()
+        self.session = self.session or cloudscraper.create_scraper()
         self._authenticate()
 
     def disconnect(self):
