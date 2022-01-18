@@ -87,7 +87,9 @@ class GarminClient(object):
     """
 
     username: str = attr.ib(default=config.get("username"))
-    password: str = attr.ib(default=config.get("password").get(), repr=False, converter=Password)
+    password: str = attr.ib(
+        default=config.get("password").get(), repr=False, converter=Password
+    )
     session: requests.Session = attr.ib(default=None, repr=False)
     user_agent: str = attr.ib(default=config["user-agent"])
 
