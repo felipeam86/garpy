@@ -87,15 +87,9 @@ class GarminClient(object):
     """
 
     username: str = attr.ib(default=config.get("username"))
-    password: Password = attr.ib(default=config.get("password"), repr=False)
+    password: str = attr.ib(default=config.get("password").get(), repr=False, converter=Password)
     session: requests.Session = attr.ib(default=None, repr=False)
     user_agent: str = attr.ib(default=config["user-agent"])
-
-    @password.validator
-    def enforce_password(self, attribute, value):
-        """Make sure that self.password is cast into Password"""
-        if isinstance(value, str):
-            self.password = Password(value)
 
     def __enter__(self):
         self.connect()

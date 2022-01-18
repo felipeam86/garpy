@@ -125,7 +125,7 @@ class TestGarminClient:
 
     def test_authenticate_with_Password_password(self):
         """Test normal behavior of _authenticate"""
-        client = GarminClient(username="falseuser", password=Password("falsepassword"))
+        client = GarminClient(username="falseuser", password="falsepassword")
         client.session = requests.Session()
         client.session.post = get_mocked_request(
             status_code=200,
@@ -161,7 +161,7 @@ class TestGarminClient:
     def test_authenticate_with_provided_user_agent(self):
         """Test normal behavior of _authenticate"""
         client = GarminClient(
-            username="falseuser", password=Password("falsepassword"), user_agent="Robot"
+            username="falseuser", password="falsepassword", user_agent="Robot"
         )
         client.session = requests.Session()
         client.session.post = get_mocked_request(
