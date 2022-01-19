@@ -106,7 +106,14 @@ class GarminClient(object):
                 "Missing credentials. Your forgot to provide username or password. "
                 f"username: '{self.username}'. password: '{self.password}'"
             )
-        self.session = self.session or cloudscraper.create_scraper()
+        self.session = self.session or cloudscraper.create_scraper(
+            browser={
+                "browser": "firefox",
+                "platform": "windows",
+                "mobile": False,
+            }
+        )
+
         self._authenticate()
 
     def disconnect(self):
