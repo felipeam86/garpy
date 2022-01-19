@@ -2,7 +2,7 @@
 Garpy: Make your garmin data yours!
 ###################################
 
-|PyPI-Versions| |PyPI-Status| |Codacy-Grade| |Travis| |Coveralls|
+|PyPI-Versions| |PyPI-Status| |Codacy-Grade| |Tests| |Coveralls|
 
 ``garpy`` is a simple app used to backup your data from Garmin Connect. It can be used to do incremental
 backups of your data from Garmin Connect or to download one specific activity.
@@ -112,8 +112,8 @@ created a package from it.
    :target: https://pypi.org/project/garpy
 .. |Codacy-Grade| image:: https://api.codacy.com/project/badge/Grade/2fbbd268e0a04cd0983291227be53873
    :target: https://app.codacy.com/manual/garpy/garpy/dashboard
-.. |Travis| image:: https://api.travis-ci.com/felipeam86/garpy.png?branch=master
-    :target: http://travis-ci.com/felipeam86/garpy
+.. |Tests| image:: https://github.com/felipeam86/garpy/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/felipeam86/garpy/actions/workflows/test.yml
 .. |Coveralls| image:: https://coveralls.io/repos/github/felipeam86/garpy/badge.svg?branch=develop
     :target: https://coveralls.io/github/felipeam86/garpy?branch=develop
 
