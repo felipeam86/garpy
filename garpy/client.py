@@ -17,9 +17,9 @@ import sys
 from typing import Dict, List, Tuple
 
 import attr
+import cloudscraper
 import pendulum
 import requests
-import cloudscraper
 
 from .settings import Password, config
 
