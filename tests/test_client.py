@@ -19,7 +19,7 @@ RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 
 class TestExtractAuthTicketUrl:
     def test_with_good_response(self):
-        auth_response_extract = 'var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";'
+        auth_response_extract = 'var response_url                    =\n"https://connect.garmin.com/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";'
         url = extract_auth_ticket_url(auth_response_extract)
         assert (
             url
@@ -116,7 +116,7 @@ class TestGarminClient:
         client.session.post = get_mocked_request(
             status_code=200,
             func_name="client.session.post()",
-            text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
+            text='var response_url                    =\n"https://connect.garmin.com/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
         )
         client.session.get = get_mocked_request(
             status_code=200, func_name="client.session.get()"
@@ -125,12 +125,12 @@ class TestGarminClient:
 
     def test_authenticate_with_Password_password(self):
         """Test normal behavior of _authenticate"""
-        client = GarminClient(username="falseuser", password=Password("falsepassword"))
+        client = GarminClient(username="falseuser", password="falsepassword")
         client.session = requests.Session()
         client.session.post = get_mocked_request(
             status_code=200,
             func_name="client.session.post()",
-            text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
+            text='var response_url                    =\n"https://connect.garmin.com/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
         )
         client.session.get = get_mocked_request(
             status_code=200, func_name="client.session.get()"
@@ -161,13 +161,13 @@ class TestGarminClient:
     def test_authenticate_with_provided_user_agent(self):
         """Test normal behavior of _authenticate"""
         client = GarminClient(
-            username="falseuser", password=Password("falsepassword"), user_agent="Robot"
+            username="falseuser", password="falsepassword", user_agent="Robot"
         )
         client.session = requests.Session()
         client.session.post = get_mocked_request(
             status_code=200,
             func_name="client.session.post()",
-            text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
+            text='var response_url                    =\n"https://connect.garmin.com/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
         )
         client.session.get = get_mocked_request(
             status_code=200, func_name="client.session.get()"
@@ -227,7 +227,7 @@ class TestGarminClient:
         client.session.post = get_mocked_request(
             status_code=200,
             func_name="client.session.post()",
-            text='var response_url                    =\n"https:\/\/connect.garmin.com\/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
+            text='var response_url                    =\n"https://connect.garmin.com/modern?ticket=DG-2742319-qf4sfe2315ddfQFQ3dYc-cas";',
         )
         client.session.get = get_mocked_request(
             status_code=404, func_name="client.session.get()"

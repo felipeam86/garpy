@@ -37,7 +37,7 @@ def main():
     "--password",
     "-p",
     prompt=True,
-    default=config.get("password"),
+    default=config.get("password").get(),
     metavar="{password}",
     help="Password of your Garmin account",
     hide_input=True,

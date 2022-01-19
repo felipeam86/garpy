@@ -17,9 +17,9 @@ import sys
 from typing import Dict, List, Tuple
 
 import attr
+import cloudscraper
 import pendulum
 import requests
-import cloudscraper
 
 from .settings import Password, config
 
@@ -87,15 +87,11 @@ class GarminClient(object):
     """
 
     username: str = attr.ib(default=config.get("username"))
-    password: Password = attr.ib(default=config.get("password"), repr=False)
+    password: str = attr.ib(
+        default=config.get("password").get(), repr=False, converter=Password
+    )
     session: requests.Session = attr.ib(default=None, repr=False)
     user_agent: str = attr.ib(default=config["user-agent"])
-
-    @password.validator
-    def enforce_password(self, attribute, value):
-        """Make sure that self.password is cast into Password"""
-        if isinstance(value, str):
-            self.password = Password(value)
 
     def __enter__(self):
         self.connect()
@@ -110,7 +106,14 @@ class GarminClient(object):
                 "Missing credentials. Your forgot to provide username or password. "
                 f"username: '{self.username}'. password: '{self.password}'"
             )
-        self.session = self.session or cloudscraper.create_scraper()
+        self.session = self.session or cloudscraper.create_scraper(
+            browser={
+                "browser": "firefox",
+                "platform": "windows",
+                "mobile": False,
+            }
+        )
+
         self._authenticate()
 
     def disconnect(self):
