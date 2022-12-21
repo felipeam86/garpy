@@ -17,12 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        exclude:
-          # Github actions does not have the latest Py3.6.15 for windows
-          - os: windows-latest
-            python-version: 3.6
 
     steps:
     - uses: actions/checkout@v2
