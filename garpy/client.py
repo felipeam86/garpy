@@ -183,7 +183,7 @@ class GarminClient(object):
                 "Attempt to use GarminClient without being connected. Call connect() before first use."
             )
 
-        response = self.session.get(url, params=params)
+        response = self.session.get(url, params=params, headers={"NK": "NT"})
         if response.status_code in tolerate:
             return response
         elif response.status_code != 200:
