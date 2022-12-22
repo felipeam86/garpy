@@ -85,7 +85,7 @@ For more detailed usage, invoke the '--help' command:
 ************
 Installation
 ************
-``garpy`` requires Python 3.6 or higher on your system. For those who know your way around with Python, install
+``garpy`` requires Python 3.7 or higher on your system. For those who know your way around with Python, install
 ``garpy`` with pip as follows:
 
 .. code:: sh
