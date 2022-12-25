@@ -27,9 +27,9 @@ activities:
     tolerate:
       - 404
       - 500
-  mkl:
+  kml:
     endpoint: "https://connect.garmin.com/proxy/download-service/export/kml/activity/{id}"
-    suffix: ".mkl"
+    suffix: ".kml"
     tolerate:
       - 404
       - 204
