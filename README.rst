@@ -55,21 +55,19 @@ For more detailed usage, invoke the '--help' command:
       Download activities from Garmin Connect
 
       Entry point for downloading activities from Garmin Connect. By default, it
-      downloads all newly created activities since the last time you did a
-      backup.
+      downloads all newly created activities since the last time you did a backup.
 
       If you specify an activity ID with the "-a/--activity" flag, only that
-      activity will be downloaded, even if it has already been downloaded
-      before.
+      activity will be downloaded, even if it has already been downloaded before.
 
       If no format is specified, the app will download all possible formats.
       Otherwise you can specify the formats you wish to download with the
       "-f/--formats" flag. The flag can be used several  times if you wish to
-      specify several formats, e.g., 'garpy download [OPTIONS] -f original -f
-      gpx [BACKUP_DIR]' will download .fit and .gpx files
+      specify several formats, e.g., 'garpy download [OPTIONS] -f original -f gpx
+      [BACKUP_DIR]' will download .fit and .gpx files
 
-    Options:
-      -f, --formats [tcx|gpx|original|summary|fit|details]
+      Options:
+      -f, --formats [original|gpx|fit|tcx|kml|summary|details]
                                       Which formats to download. The flag can be
                                       used several times, e.g. '-f original -f
                                       gpx'
@@ -79,6 +77,7 @@ For more detailed usage, invoke the '--help' command:
                                       that activity, even if it has already been
                                       downloaded. Otherwise, do incremental update
                                       of backup
+      --user-agent {user_agent}       User agent to be used by requests
       --help                          Show this message and exit.
 
 
