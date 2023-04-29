@@ -1,8 +1,9 @@
 from pathlib import Path
 
 import click
+from garpyclient import GarminClient
 
-from garpy import ActivitiesDownloader, GarminClient
+from garpy import ActivitiesDownloader
 from garpy.settings import config
 
 FORMATS = set(config.get("activities").keys()) | {"fit"}

@@ -5,8 +5,9 @@ from pathlib import Path
 from typing import Dict
 
 import attr
+from garpyclient import GarminClient
 
-from . import Activities, Activity, GarminClient
+from . import Activities, Activity
 from .settings import config
 
 logger = logging.getLogger(__name__)

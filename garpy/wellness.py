@@ -4,8 +4,7 @@ from pathlib import Path
 
 import attr
 import pendulum
-
-from .client import GarminClient
+from garpyclient import GarminClient
 
 
 @attr.s(frozen=True)

@@ -9,8 +9,8 @@ from typing import Any, Dict
 
 import attr
 import pendulum
+from garpyclient import GarminClient
 
-from .client import GarminClient
 from .settings import config
 
 

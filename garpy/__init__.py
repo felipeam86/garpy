@@ -4,7 +4,6 @@ import logging
 import sys
 
 from .activity import Activities, Activity
-from .client import GarminClient
 from .download import ActivitiesDownloader
 from .wellness import Wellness
 
