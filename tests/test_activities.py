@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
-from conftest import get_activity, get_mocked_request, get_mocked_response
+from conftest import get_mocked_response
 
 from garpy import Activities, Activity
 
@@ -62,7 +62,7 @@ class TestActivity:
 
         with pytest.raises(ValueError) as excinfo:
             activity.get_export_filepath(tmp_path, "unknown_format")
-        assert f"Format 'unknown_format' unknown." in str(excinfo.value)
+        assert "Format 'unknown_format' unknown." in str(excinfo.value)
 
     def test_filename_windows(self, activity):
         with patch("os.name", "nt"):
