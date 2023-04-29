@@ -3,8 +3,9 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+from garpyclient import GarminClient
 
-from garpy import Activity, GarminClient
+from garpy import Activity
 
 RESPONSE_EXAMPLES_PATH = Path(__file__).parent / "response_examples"
 
