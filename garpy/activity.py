@@ -3,18 +3,18 @@
 import json
 import os
 import zipfile
+from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict
 
-import attr
 import pendulum
 from garpyclient import GarminClient
 
 from .settings import config
 
 
-@attr.s(frozen=True)
+@dataclass(frozen=True, eq=True)
 class Activity:
     """Garmin activity
 
@@ -38,10 +38,10 @@ class Activity:
 
     """
 
-    id: int = attr.ib()
-    name: str = attr.ib()
-    type: str = attr.ib()
-    start: pendulum.DateTime = attr.ib()
+    id: int
+    name: str
+    type: str
+    start: pendulum.DateTime
 
     @property
     def base_filename(self):

@@ -1,10 +1,10 @@
 #! /usr/bin/env python
 
 import logging
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict
 
-import attr
 from garpyclient import GarminClient
 
 from . import Activities, Activity
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_FORMATS = tuple(config["activities"].keys())
 
 
-@attr.s
+@dataclass
 class ActivitiesDownloader:
     """Class for doing incremental backups of your Garmin activitiess
 
@@ -27,14 +27,13 @@ class ActivitiesDownloader:
         Where to download the file
     """
 
-    client: GarminClient = attr.ib()
-    backup_dir: Path = attr.ib(default=config["backup-dir"])
+    client: GarminClient
+    backup_dir: Path = field(default=config["backup-dir"])
 
-    @backup_dir.validator
-    def enforce_path(self, attribute, value):
+    def __post_init__(self):
         """Make sure that self.backup_dir is cast into Path and that it exits"""
-        if isinstance(value, str):
-            self.backup_dir = Path(value)
+        if isinstance(self.backup_dir, str):
+            self.backup_dir = Path(self.backup_dir)
         self.backup_dir = self.backup_dir.absolute()
         self.backup_dir.mkdir(exist_ok=True)
 

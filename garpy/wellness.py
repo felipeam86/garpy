@@ -1,13 +1,13 @@
 #! /usr/bin/env python
 
+from dataclasses import dataclass
 from pathlib import Path
 
-import attr
 import pendulum
 from garpyclient import GarminClient
 
 
-@attr.s(frozen=True)
+@dataclass
 class Wellness:
     """Garmin wellness data
 
@@ -19,14 +19,13 @@ class Wellness:
 
     """
 
-    date: pendulum.DateTime = attr.ib()
+    date: pendulum.DateTime
 
-    @date.validator
-    def wont_travel_to_future(self, attribute, value):
-        if value.in_tz("local") > pendulum.DateTime.today().in_tz("local"):
+    def __post_init__(self):
+        if self.date.in_tz("local") > pendulum.DateTime.today().in_tz("local"):
             raise ValueError(
                 f"garpy cannot download data from the future... "
-                f"try a date before today {value.format('YYYY-MM-DD')}"
+                f"try a date before today {self.date.format('YYYY-MM-DD')}"
             )
 
     @property
